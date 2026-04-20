@@ -1,20 +1,26 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Inter, Lora, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils/utils";
 import { Providers } from "./providers";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fontSans = Inter({
   subsets: ["latin"],
+  variable: "--font-sans",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const fontSerif = Lora({
   subsets: ["latin"],
+  variable: "--font-serif",
 });
+
+const fontMono = Fira_Code({
+  subsets: ["latin"],
+  variable: "--font-mono",
+});
+
 
 export const metadata: Metadata = {
   title: "b-link",
@@ -29,8 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="it"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans",
-        inter.variable)}
+      className={cn("h-full", "antialiased", fontSans.variable, fontMono.variable, "font-sans", fontSerif.variable)}
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>

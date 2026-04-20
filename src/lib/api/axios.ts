@@ -57,6 +57,15 @@ apiClient.interceptors.response.use(
       return Promise.reject(error)
     }
 
+    // Route che non devono triggherare il refresh automatico
+    const PUBLIC_ROUTES = ['/auth/login', '/auth/register', '/auth/refresh']
+    const requestUrl = error.config?.url ?? ''
+    const isPublicRoute = PUBLIC_ROUTES.some((route) => requestUrl.includes(route))
+
+    if (isPublicRoute) {
+      return Promise.reject(error)
+    }
+
     // Evita doppi refresh
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
