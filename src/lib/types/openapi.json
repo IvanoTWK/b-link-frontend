@@ -1,0 +1,4257 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Account creato. Restituisce accessToken; refreshToken impostato come cookie HttpOnly."
+          },
+          "400": {
+            "description": "Dati non validi (validazione Zod)."
+          },
+          "409": {
+            "description": "Email già registrata."
+          }
+        },
+        "summary": "Registra un nuovo account",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Credenziali valide. Se non è richiesta la 2FA: accessToken + cookie. Se è richiesta la 2FA: { action, preAuthToken }."
+          },
+          "401": {
+            "description": "Credenziali non valide."
+          },
+          "403": {
+            "description": "Email non verificata (DONOR) oppure account bloccato."
+          }
+        },
+        "summary": "Login con email e password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Nuovo accessToken + refresh cookie ruotato."
+          },
+          "401": {
+            "description": "Refresh token mancante, scaduto o revocato."
+          }
+        },
+        "security": [
+          {
+            "refreshToken": []
+          }
+        ],
+        "summary": "Rinnova accessToken tramite refreshToken cookie",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Logout effettuato. Cookie rimosso."
+          },
+          "401": {
+            "description": "Access token mancante o revocato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Logout: revoca refresh token e invalida access token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "{ userId, role }"
+          },
+          "401": {
+            "description": "Access token mancante o revocato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Restituisce il payload dell'utente autenticato",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/verify-email/confirm": {
+      "post": {
+        "operationId": "AuthController_verifyEmailConfirm",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyEmailConfirmDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ ok: true }"
+          },
+          "400": {
+            "description": "Token non valido o scaduto."
+          }
+        },
+        "summary": "Conferma l'indirizzo email tramite token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/verify-email/resend": {
+      "post": {
+        "operationId": "AuthController_verifyEmailResend",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyEmailResendDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Risponde sempre 200 per evitare user enumeration."
+          }
+        },
+        "summary": "Reinvia email di verifica",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "operationId": "AuthController_forgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Risponde sempre 200 per evitare user enumeration."
+          }
+        },
+        "summary": "Avvia il flusso di reset password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "operationId": "AuthController_resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ ok: true }. Tutte le sessioni attive vengono chiuse."
+          },
+          "400": {
+            "description": "Token non valido o scaduto."
+          }
+        },
+        "summary": "Imposta nuova password tramite token di reset",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/change-password": {
+      "post": {
+        "operationId": "AuthController_changePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ ok: true }. Le altre sessioni attive vengono chiuse."
+          },
+          "401": {
+            "description": "Password attuale errata o token revocato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Cambia la password dell'utente autenticato",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/audit-logs": {
+      "get": {
+        "operationId": "AuditLogController_getAuditLogs",
+        "parameters": [
+          {
+            "name": "actorId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "name": "ipAddress",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ items, nextCursor }"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Lista audit log con filtri (ADMIN only). Paginazione cursor-based.",
+        "tags": [
+          "audit-logs"
+        ]
+      }
+    },
+    "/auth/2fa/setup-init": {
+      "post": {
+        "operationId": "TwoFactorController_setupInit",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "{ secret, otpauthUrl } — mostrare il QR code all'utente."
+          },
+          "401": {
+            "description": "Pre-auth token mancante, scaduto o con phase errato."
+          }
+        },
+        "security": [
+          {
+            "preAuthToken": []
+          }
+        ],
+        "summary": "Avvia setup 2FA: genera segreto TOTP e URL per QR code",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/2fa/activate": {
+      "post": {
+        "operationId": "TwoFactorController_activate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TwoFactorCodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ accessToken, backupCodes } — i backup codes vanno mostrati una sola volta."
+          },
+          "400": {
+            "description": "Setup 2FA non avviato."
+          },
+          "401": {
+            "description": "Codice TOTP non valido o pre-auth token scaduto."
+          }
+        },
+        "security": [
+          {
+            "preAuthToken": []
+          }
+        ],
+        "summary": "Attiva il 2FA verificando il primo codice TOTP",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/2fa/verify": {
+      "post": {
+        "operationId": "TwoFactorController_verify",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TwoFactorCodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ accessToken } + cookie refreshToken."
+          },
+          "401": {
+            "description": "Codice TOTP non valido o pre-auth token scaduto."
+          }
+        },
+        "security": [
+          {
+            "preAuthToken": []
+          }
+        ],
+        "summary": "Verifica codice TOTP durante il login",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/2fa/verify-backup": {
+      "post": {
+        "operationId": "TwoFactorController_verifyBackup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackupCodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ accessToken } + cookie refreshToken. Il codice usato viene eliminato."
+          },
+          "401": {
+            "description": "Codice di backup non valido o pre-auth token scaduto."
+          }
+        },
+        "security": [
+          {
+            "preAuthToken": []
+          }
+        ],
+        "summary": "Accede con un codice di backup monouso (in sostituzione del TOTP)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/2fa/enable": {
+      "post": {
+        "operationId": "TwoFactorController_enable",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "{ secret, otpauthUrl } — mostrare il QR code all'utente. Confermare con /auth/2fa/enable/confirm."
+          },
+          "401": {
+            "description": "Access token mancante o revocato."
+          },
+          "403": {
+            "description": "Staff non può usare questo endpoint (usa il flusso post-login)."
+          },
+          "409": {
+            "description": "2FA già attivo per questo account."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Avvia setup 2FA opzionale da sessione autenticata (solo DONOR/GUEST)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/2fa/enable/confirm": {
+      "post": {
+        "operationId": "TwoFactorController_enableConfirm",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TwoFactorCodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ backupCodes } — mostrare una sola volta. La sessione corrente rimane valida."
+          },
+          "400": {
+            "description": "Setup 2FA non avviato per questo account."
+          },
+          "401": {
+            "description": "Codice TOTP non valido o access token revocato."
+          },
+          "403": {
+            "description": "Staff non può usare questo endpoint."
+          },
+          "409": {
+            "description": "2FA già attivo per questo account."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Conferma setup 2FA opzionale verificando il primo codice TOTP (solo DONOR/GUEST)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/2fa/disable": {
+      "post": {
+        "operationId": "TwoFactorController_disable",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TwoFactorCodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ ok: true }. La sessione corrente viene chiusa."
+          },
+          "400": {
+            "description": "2FA non attivo per questo account."
+          },
+          "401": {
+            "description": "Codice TOTP non valido."
+          },
+          "403": {
+            "description": "Staff non può disabilitare il 2FA."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Disabilita il 2FA (solo DONOR; vietato per lo staff)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/donation-types": {
+      "get": {
+        "operationId": "DonationTypesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Array di DonationType."
+          }
+        },
+        "summary": "Lista tipi di donazione attivi (pubblico)",
+        "tags": [
+          "donation-types"
+        ]
+      },
+      "post": {
+        "operationId": "DonationTypesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDonationTypeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "DonationType creato."
+          },
+          "409": {
+            "description": "Codice già utilizzato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Crea un nuovo tipo di donazione (ADMIN)",
+        "tags": [
+          "donation-types"
+        ]
+      }
+    },
+    "/donation-types/{id}": {
+      "get": {
+        "operationId": "DonationTypesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DonationType con intervalsFrom e intervalsTo."
+          },
+          "404": {
+            "description": "Tipo non trovato."
+          }
+        },
+        "summary": "Dettaglio tipo di donazione con intervalli incrociati (pubblico)",
+        "tags": [
+          "donation-types"
+        ]
+      },
+      "patch": {
+        "operationId": "DonationTypesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDonationTypeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "DonationType aggiornato."
+          },
+          "404": {
+            "description": "Tipo non trovato."
+          },
+          "409": {
+            "description": "Esistono slot futuri o prenotazioni attive (solo per modifiche a regole cliniche)."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Aggiorna nome, regole cliniche o stato attivo di un tipo (ADMIN). isActive può sempre essere modificato; le regole cliniche sono bloccate se esistono slot futuri o prenotazioni attive.",
+        "tags": [
+          "donation-types"
+        ]
+      }
+    },
+    "/donation-types/intervals": {
+      "post": {
+        "operationId": "DonationTypesController_createInterval",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDonationTypeIntervalDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "DonationTypeInterval creato."
+          },
+          "400": {
+            "description": "fromTypeId uguale a toTypeId."
+          },
+          "404": {
+            "description": "Tipo sorgente o destinazione non trovato."
+          },
+          "409": {
+            "description": "Intervallo già esistente per questa coppia."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Crea un intervallo incrociato tra due tipi (ADMIN)",
+        "tags": [
+          "donation-types"
+        ]
+      }
+    },
+    "/donation-types/intervals/{id}": {
+      "patch": {
+        "operationId": "DonationTypesController_patchInterval",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDonationTypeIntervalDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "DonationTypeInterval aggiornato."
+          },
+          "404": {
+            "description": "Intervallo non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Aggiorna i giorni di un intervallo incrociato (ADMIN)",
+        "tags": [
+          "donation-types"
+        ]
+      },
+      "delete": {
+        "operationId": "DonationTypesController_deleteInterval",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Intervallo eliminato."
+          },
+          "404": {
+            "description": "Intervallo non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Rimuove un intervallo incrociato (ADMIN)",
+        "tags": [
+          "donation-types"
+        ]
+      }
+    },
+    "/exam-parameters": {
+      "get": {
+        "operationId": "ExamParametersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Array di ExamParameter."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Lista parametri di laboratorio attivi (DOCTOR / OPERATOR / ADMIN)",
+        "tags": [
+          "exam-parameters"
+        ]
+      },
+      "post": {
+        "operationId": "ExamParametersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExamParameterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "ExamParameter creato."
+          },
+          "409": {
+            "description": "Parametro con lo stesso nome già esistente."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Crea un nuovo parametro di laboratorio (ADMIN)",
+        "tags": [
+          "exam-parameters"
+        ]
+      }
+    },
+    "/exam-parameters/{id}": {
+      "patch": {
+        "operationId": "ExamParametersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateExamParameterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ExamParameter aggiornato."
+          },
+          "404": {
+            "description": "Parametro non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Aggiorna range di riferimento di un parametro (ADMIN)",
+        "tags": [
+          "exam-parameters"
+        ]
+      },
+      "delete": {
+        "operationId": "ExamParametersController_deactivate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Parametro disattivato."
+          },
+          "400": {
+            "description": "Parametro già disattivato."
+          },
+          "404": {
+            "description": "Parametro non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Disattiva un parametro (soft delete, ADMIN)",
+        "tags": [
+          "exam-parameters"
+        ]
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "operationId": "AdminController_getUsers",
+        "parameters": [
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "GUEST",
+                "DONOR",
+                "OPERATOR",
+                "DOCTOR",
+                "ADMIN"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "emailVerified",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "locked",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ items, nextCursor }"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Lista utenti con filtri e paginazione cursor-based",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "AdminController_createStaffUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStaffUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Utente creato. Email con link reset inviata."
+          },
+          "409": {
+            "description": "Email già registrata."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Crea un utente staff e invia email per impostare la password",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/role": {
+      "patch": {
+        "operationId": "AdminController_updateUserRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ruolo aggiornato."
+          },
+          "404": {
+            "description": "Utente non trovato."
+          },
+          "409": {
+            "description": "Impossibile declassare l'unico ADMIN."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Aggiorna il ruolo di un utente",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/unlock": {
+      "post": {
+        "operationId": "AdminController_unlockUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Account sbloccato."
+          },
+          "400": {
+            "description": "Account non bloccato."
+          },
+          "404": {
+            "description": "Utente non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Sblocca un account dopo lockout",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/staff-profiles": {
+      "post": {
+        "operationId": "AdminController_createStaffProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStaffProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "StaffProfile creato."
+          },
+          "404": {
+            "description": "Utente non trovato."
+          },
+          "409": {
+            "description": "Utente ha già un profilo staff."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Crea un profilo staff per un utente esistente",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/staff-profiles/{id}": {
+      "patch": {
+        "operationId": "AdminController_updateStaffProfile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStaffProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "StaffProfile aggiornato."
+          },
+          "404": {
+            "description": "Profilo staff non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Riassegna il centro di un profilo staff",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/reset-2fa": {
+      "post": {
+        "operationId": "AdminController_resetTwoFactor",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ ok: true }. Al prossimo login verrà richiesto un nuovo setup 2FA."
+          },
+          "400": {
+            "description": "Utente non staff o 2FA non attivo."
+          },
+          "404": {
+            "description": "Utente non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Reset 2FA di un utente staff (ADMIN). Rimuove il segreto TOTP e i backup codes.",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/anamnesis/questions": {
+      "get": {
+        "operationId": "AnamnesisController_getQuestions",
+        "parameters": [
+          {
+            "name": "formVersion",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeInactive",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista domande ordinate per version desc, order asc."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Lista domande anamnesi (tutti i ruoli autenticati). Filtro per formVersion.",
+        "tags": [
+          "anamnesis"
+        ]
+      },
+      "post": {
+        "operationId": "AnamnesisController_createQuestion",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAnamnesisQuestionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Domanda creata."
+          },
+          "409": {
+            "description": "Codice già esistente."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Crea domanda anamnesi (ADMIN). Codice in UPPER_SNAKE_CASE.",
+        "tags": [
+          "anamnesis"
+        ]
+      }
+    },
+    "/anamnesis/questions/{id}": {
+      "patch": {
+        "operationId": "AnamnesisController_updateQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAnamnesisQuestionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Domanda aggiornata."
+          },
+          "404": {
+            "description": "Domanda non trovata."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Aggiorna testo/ordine/versione di una domanda (ADMIN).",
+        "tags": [
+          "anamnesis"
+        ]
+      },
+      "delete": {
+        "operationId": "AnamnesisController_deactivateQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ ok: true }"
+          },
+          "400": {
+            "description": "Già disattivata."
+          },
+          "404": {
+            "description": "Domanda non trovata."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Disattiva una domanda (soft delete, ADMIN).",
+        "tags": [
+          "anamnesis"
+        ]
+      }
+    },
+    "/bookings": {
+      "post": {
+        "operationId": "BookingsController_createBooking",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBookingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Prenotazione confermata."
+          },
+          "400": {
+            "description": "Slot non disponibile o vincolo clinico violato."
+          },
+          "403": {
+            "description": "Esclusione attiva o profilo disattivato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Prenota uno slot (DONOR)",
+        "tags": [
+          "bookings"
+        ]
+      },
+      "get": {
+        "operationId": "BookingsController_getBookings",
+        "parameters": [
+          {
+            "name": "centerId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "CONFIRMED",
+                "IN_AWAITING_REPORT",
+                "COMPLETED",
+                "CANCELLED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "donorId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ items, nextCursor }"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Lista prenotazioni (DONOR: proprie; OPERATOR/ADMIN: con filtri)",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
+    "/bookings/{id}": {
+      "get": {
+        "operationId": "BookingsController_getBookingById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Prenotazione."
+          },
+          "403": {
+            "description": "DONOR non può vedere prenotazioni altrui."
+          },
+          "404": {
+            "description": "Prenotazione non trovata."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Dettaglio prenotazione",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
+    "/bookings/{id}/cancel": {
+      "post": {
+        "operationId": "BookingsController_cancelBooking",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelBookingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prenotazione cancellata."
+          },
+          "400": {
+            "description": "Stato non cancellabile."
+          },
+          "403": {
+            "description": "Accesso non autorizzato."
+          },
+          "404": {
+            "description": "Prenotazione non trovata."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Cancella prenotazione (DONOR: propria CONFIRMED; OPERATOR/ADMIN: qualsiasi)",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
+    "/bookings/{id}/reschedule": {
+      "patch": {
+        "operationId": "BookingsController_rescheduleBooking",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RescheduleBookingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prenotazione spostata al nuovo slot."
+          },
+          "400": {
+            "description": "Stato non consentito, deadline superata, slot non disponibile o tipo diverso."
+          },
+          "403": {
+            "description": "Accesso non autorizzato."
+          },
+          "404": {
+            "description": "Prenotazione o slot non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Sposta la prenotazione su un nuovo slot (DONOR owner, solo CONFIRMED)",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
+    "/bookings/{id}/anamnesis": {
+      "post": {
+        "operationId": "BookingsController_submitAnamnesis",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAnamnesisDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Questionario salvato."
+          },
+          "400": {
+            "description": "Prenotazione cancellata o questionario già compilato."
+          },
+          "403": {
+            "description": "Accesso non autorizzato."
+          },
+          "404": {
+            "description": "Prenotazione non trovata."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Compila questionario anamnestico (DONOR owner)",
+        "tags": [
+          "bookings"
+        ]
+      },
+      "get": {
+        "operationId": "BookingsController_getAnamnesis",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Questionario anamnestico."
+          },
+          "404": {
+            "description": "Prenotazione o questionario non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Legge questionario anamnestico (DOCTOR/OPERATOR/ADMIN)",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
+    "/centers": {
+      "get": {
+        "operationId": "CentersController_getCenters",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "lat",
+            "required": false,
+            "in": "query",
+            "description": "Latitudine utente (-90..90)",
+            "schema": {
+              "minimum": -90,
+              "maximum": 90,
+              "type": "number"
+            }
+          },
+          {
+            "name": "lon",
+            "required": false,
+            "in": "query",
+            "description": "Longitudine utente (-180..180)",
+            "schema": {
+              "minimum": -180,
+              "maximum": 180,
+              "type": "number"
+            }
+          },
+          {
+            "name": "radius",
+            "required": false,
+            "in": "query",
+            "description": "Raggio in km (default 50, max 500)",
+            "schema": {
+              "maximum": 500,
+              "exclusiveMinimum": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ items, nextCursor }. In geo-search items includono distance_km."
+          }
+        },
+        "summary": "Lista centri attivi (pubblico). Con lat+lon attiva geo-search haversine ordinato per distanza.",
+        "tags": [
+          "centers"
+        ]
+      },
+      "post": {
+        "operationId": "CentersController_createCenter",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCenterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Centro creato."
+          },
+          "409": {
+            "description": "Centro già esistente."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Crea nuovo centro (ADMIN)",
+        "tags": [
+          "centers"
+        ]
+      }
+    },
+    "/centers/{id}": {
+      "get": {
+        "operationId": "CentersController_getCenterById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Centro con staff."
+          },
+          "404": {
+            "description": "Centro non trovato."
+          }
+        },
+        "summary": "Dettaglio centro con staff assegnato (pubblico)",
+        "tags": [
+          "centers"
+        ]
+      },
+      "patch": {
+        "operationId": "CentersController_updateCenter",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCenterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Centro aggiornato."
+          },
+          "404": {
+            "description": "Centro non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Aggiorna dati centro (ADMIN)",
+        "tags": [
+          "centers"
+        ]
+      },
+      "delete": {
+        "operationId": "CentersController_deleteCenter",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Centro disattivato."
+          },
+          "400": {
+            "description": "Esistono slot futuri attivi."
+          },
+          "404": {
+            "description": "Centro non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Soft delete centro (ADMIN). Blocca se esistono slot futuri.",
+        "tags": [
+          "centers"
+        ]
+      }
+    },
+    "/donations": {
+      "post": {
+        "operationId": "DonationsController_createDonation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDonationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Donazione registrata, booking → IN_AWAITING_REPORT."
+          },
+          "400": {
+            "description": "Booking non CONFIRMED o donazione già presente."
+          },
+          "404": {
+            "description": "Booking non trovata."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Registra una donazione effettuata (OPERATOR/ADMIN)",
+        "tags": [
+          "donations"
+        ]
+      },
+      "get": {
+        "operationId": "DonationsController_getDonations",
+        "parameters": [
+          {
+            "name": "donorId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "centerId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ items, nextCursor }"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Storico donazioni (DONOR: proprie; staff: con filtri)",
+        "tags": [
+          "donations"
+        ]
+      }
+    },
+    "/donations/{id}": {
+      "get": {
+        "operationId": "DonationsController_getDonationById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Donazione con booking, centro e tipo."
+          },
+          "403": {
+            "description": "DONOR non può vedere donazioni altrui."
+          },
+          "404": {
+            "description": "Donazione non trovata."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Dettaglio donazione",
+        "tags": [
+          "donations"
+        ]
+      }
+    },
+    "/gdpr/requests": {
+      "post": {
+        "operationId": "GdprController_createRequest",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGdprRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Richiesta creata."
+          },
+          "409": {
+            "description": "Esiste già una richiesta pendente dello stesso tipo."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Crea richiesta GDPR (DONOR). Type: EXPORT | DELETION | RECTIFICATION.",
+        "tags": [
+          "gdpr"
+        ]
+      },
+      "get": {
+        "operationId": "GdprController_getRequests",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "PENDING",
+                "COMPLETED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "EXPORT",
+                "DELETION",
+                "RECTIFICATION"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ items, nextCursor }"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Lista richieste GDPR. DONOR: proprie. ADMIN: tutte, con filtri.",
+        "tags": [
+          "gdpr"
+        ]
+      }
+    },
+    "/gdpr/requests/{id}": {
+      "get": {
+        "operationId": "GdprController_getRequestById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Richiesta GDPR."
+          },
+          "403": {
+            "description": "DONOR tenta di accedere a richiesta altrui."
+          },
+          "404": {
+            "description": "Richiesta non trovata."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Dettaglio richiesta GDPR (DONOR: propria; ADMIN: qualsiasi).",
+        "tags": [
+          "gdpr"
+        ]
+      }
+    },
+    "/gdpr/requests/{id}/cancel": {
+      "patch": {
+        "operationId": "GdprController_cancelOwnRequest",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Richiesta annullata."
+          },
+          "400": {
+            "description": "Richiesta non più in stato PENDING."
+          },
+          "403": {
+            "description": "Accesso non autorizzato."
+          },
+          "404": {
+            "description": "Richiesta non trovata."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "DONOR annulla la propria richiesta PENDING.",
+        "tags": [
+          "gdpr"
+        ]
+      }
+    },
+    "/gdpr/requests/{id}/handle": {
+      "patch": {
+        "operationId": "GdprController_handleRequest",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandleGdprRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Richiesta gestita. Per EXPORT include exportData."
+          },
+          "400": {
+            "description": "Richiesta già completata."
+          },
+          "404": {
+            "description": "Richiesta non trovata."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "ADMIN gestisce una richiesta GDPR: marca COMPLETED. Per DELETION: anonimizza utente + revoca sessioni. Per EXPORT: restituisce JSON dati donatore.",
+        "tags": [
+          "gdpr"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Tutti gli indicatori OK."
+          },
+          "503": {
+            "description": "Uno o più indicatori in errore."
+          }
+        },
+        "summary": "Liveness/readiness probe. Controlla DB, heap e disco.",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/medical/donors": {
+      "get": {
+        "operationId": "MedicalController_searchDonors",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Stringa di ricerca (nome o cognome)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array di profili donatore con conteggio donazioni completate."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Ricerca donatori per nome/cognome (DOCTOR: solo del proprio centro; ADMIN: tutti)",
+        "tags": [
+          "medical"
+        ]
+      }
+    },
+    "/medical/reports": {
+      "post": {
+        "operationId": "MedicalController_createReport",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMedicalReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Referto creato."
+          },
+          "400": {
+            "description": "Booking non IN_AWAITING_REPORT o referto già presente."
+          },
+          "404": {
+            "description": "Donazione non trovata."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Crea referto medico con entries (DOCTOR). Transizione booking → COMPLETED.",
+        "tags": [
+          "medical"
+        ]
+      },
+      "get": {
+        "operationId": "MedicalController_getReports",
+        "parameters": [
+          {
+            "name": "donorId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ items, nextCursor }"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Lista referti (DONOR: propri; DOCTOR/ADMIN: con filtri)",
+        "tags": [
+          "medical"
+        ]
+      }
+    },
+    "/medical/reports/{id}": {
+      "get": {
+        "operationId": "MedicalController_getReportById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Referto."
+          },
+          "403": {
+            "description": "DONOR non può vedere referti altrui."
+          },
+          "404": {
+            "description": "Referto non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Dettaglio referto con tutte le entries",
+        "tags": [
+          "medical"
+        ]
+      }
+    },
+    "/medical/notes": {
+      "post": {
+        "operationId": "MedicalController_createNote",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClinicalNoteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Nota creata."
+          },
+          "404": {
+            "description": "Donatore non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Crea nota clinica cifrata per un donatore (DOCTOR)",
+        "tags": [
+          "medical"
+        ]
+      },
+      "get": {
+        "operationId": "MedicalController_getNotes",
+        "parameters": [
+          {
+            "name": "donorId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista note."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Lista note cliniche decifrate per un donatore (DOCTOR/ADMIN)",
+        "tags": [
+          "medical"
+        ]
+      }
+    },
+    "/medical/exclusions": {
+      "post": {
+        "operationId": "MedicalController_createExclusion",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExclusionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Esclusione creata."
+          },
+          "404": {
+            "description": "Donatore non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Crea esclusione clinica (temporanea o permanente) per un donatore (DOCTOR)",
+        "tags": [
+          "medical"
+        ]
+      },
+      "get": {
+        "operationId": "MedicalController_getExclusions",
+        "parameters": [
+          {
+            "name": "donorId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista esclusioni attive."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Lista esclusioni attive decifrate per un donatore (DOCTOR/ADMIN)",
+        "tags": [
+          "medical"
+        ]
+      }
+    },
+    "/medical/exclusions/{id}/close": {
+      "patch": {
+        "operationId": "MedicalController_closeExclusion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseExclusionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ ok: true }"
+          },
+          "400": {
+            "description": "Esclusione permanente o già chiusa."
+          },
+          "404": {
+            "description": "Esclusione non trovata."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Chiude un'esclusione temporanea (DOCTOR). Blocca se permanente o già chiusa.",
+        "tags": [
+          "medical"
+        ]
+      }
+    },
+    "/stats/donations": {
+      "get": {
+        "operationId": "StatsController_getDonationStats",
+        "parameters": [
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "centerId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ total, byCenter, byDonationType }"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Statistiche donazioni: totale, per centro, per tipo (OPERATOR/ADMIN)",
+        "tags": [
+          "stats"
+        ]
+      }
+    },
+    "/stats/donors": {
+      "get": {
+        "operationId": "StatsController_getDonorStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "{ total, byBloodGroup, byBiologicalSex, newPerMonth }"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Statistiche donatori: distribuzione gruppo sanguigno/sesso, nuovi per mese (OPERATOR/ADMIN)",
+        "tags": [
+          "stats"
+        ]
+      }
+    },
+    "/stats/slots": {
+      "get": {
+        "operationId": "StatsController_getSlotOccupancy",
+        "parameters": [
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "centerId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "[ { center, slotCount, totalCapacity, totalBooked, occupancyRate } ]"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Tasso di occupazione slot per centro (OPERATOR/ADMIN)",
+        "tags": [
+          "stats"
+        ]
+      }
+    },
+    "/stats/bookings": {
+      "get": {
+        "operationId": "StatsController_getBookingStats",
+        "parameters": [
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ total, byStatus, cancellationsByReason }"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Statistiche prenotazioni: per stato, cancellazioni per motivo (OPERATOR/ADMIN)",
+        "tags": [
+          "stats"
+        ]
+      }
+    },
+    "/donors/profile": {
+      "post": {
+        "operationId": "DonorsController_createProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDonorProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Profilo creato."
+          },
+          "409": {
+            "description": "Profilo già esistente o codice fiscale duplicato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Crea il profilo del donatore autenticato",
+        "tags": [
+          "donors"
+        ]
+      },
+      "get": {
+        "operationId": "DonorsController_getOwnProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Profilo del donatore."
+          },
+          "404": {
+            "description": "Profilo non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Legge il profilo del donatore autenticato",
+        "tags": [
+          "donors"
+        ]
+      },
+      "patch": {
+        "operationId": "DonorsController_updateOwnProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDonorProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profilo aggiornato."
+          },
+          "404": {
+            "description": "Profilo non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Aggiorna phone, weight o bloodGroup del proprio profilo",
+        "tags": [
+          "donors"
+        ]
+      }
+    },
+    "/donors/profile/consent": {
+      "patch": {
+        "operationId": "DonorsController_updateConsent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConsentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profilo con consenso aggiornato."
+          },
+          "404": {
+            "description": "Profilo non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Aggiorna il consenso del donatore (consentGiven + consentVersion). Registra data di consenso.",
+        "tags": [
+          "donors"
+        ]
+      }
+    },
+    "/donors": {
+      "get": {
+        "operationId": "DonorsController_getDonors",
+        "parameters": [
+          {
+            "name": "bloodGroup",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "A+",
+                "A-",
+                "B+",
+                "B-",
+                "AB+",
+                "AB-",
+                "0+",
+                "0-",
+                "UNKNOWN"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "biologicalSex",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "MALE",
+                "FEMALE"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeDeleted",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ items, nextCursor }"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Lista donatori con filtri (OPERATOR/ADMIN)",
+        "tags": [
+          "donors"
+        ]
+      }
+    },
+    "/donors/{id}/profile": {
+      "get": {
+        "operationId": "DonorsController_getDonorProfile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profilo donatore."
+          },
+          "404": {
+            "description": "Profilo non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Legge il profilo di un donatore (OPERATOR/DOCTOR/ADMIN)",
+        "tags": [
+          "donors"
+        ]
+      }
+    },
+    "/slots": {
+      "get": {
+        "operationId": "SlotsController_getSlots",
+        "parameters": [
+          {
+            "name": "centerId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "donationTypeId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista slot con campo availability."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Lista slot con disponibilità (DONOR e staff)",
+        "tags": [
+          "slots"
+        ]
+      },
+      "post": {
+        "operationId": "SlotsController_createSlot",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSlotDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Slot creato."
+          },
+          "403": {
+            "description": "OPERATOR non assegnato a nessun centro o tenta altro centro."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Crea nuovo slot (OPERATOR: solo propria sede; ADMIN: qualsiasi)",
+        "tags": [
+          "slots"
+        ]
+      }
+    },
+    "/slots/{id}": {
+      "patch": {
+        "operationId": "SlotsController_updateSlot",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSlotDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Slot aggiornato."
+          },
+          "400": {
+            "description": "Slot con prenotazioni attive."
+          },
+          "403": {
+            "description": "OPERATOR tenta di modificare slot di un altro centro."
+          },
+          "404": {
+            "description": "Slot non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Modifica capacity o orario di uno slot (OPERATOR: solo propria sede; ADMIN: qualsiasi). Blocca se bookedCount > 0.",
+        "tags": [
+          "slots"
+        ]
+      },
+      "delete": {
+        "operationId": "SlotsController_deleteSlot",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ ok: true }"
+          },
+          "400": {
+            "description": "Esistono prenotazioni attive."
+          },
+          "403": {
+            "description": "OPERATOR tenta di eliminare slot di un altro centro."
+          },
+          "404": {
+            "description": "Slot non trovato."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "summary": "Elimina slot (OPERATOR: solo propria sede; ADMIN: qualsiasi). Blocca se esistono booking non cancellate.",
+        "tags": [
+          "slots"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "B-Link API",
+    "description": "API REST del backend B-Link — piattaforma di gestione donazioni di sangue.",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "accessToken": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      },
+      "preAuthToken": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "Pre-auth token a breve vita emesso durante il flusso 2FA."
+      },
+      "cookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "refreshToken"
+      }
+    },
+    "schemas": {
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8
+          },
+          "role": {
+            "default": "DONOR",
+            "type": "string",
+            "enum": [
+              "DONOR"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "password"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "VerifyEmailConfirmDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 32
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "VerifyEmailResendDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 32
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "token",
+          "newPassword"
+        ]
+      },
+      "ChangePasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "minLength": 1
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ]
+      },
+      "TwoFactorCodeDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 6,
+            "pattern": "^\\d{6}$"
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "BackupCodeDto": {
+        "type": "object",
+        "properties": {
+          "backupCode": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "backupCode"
+        ]
+      },
+      "CreateDonationTypeDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 10
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "minIntervalDays": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "maxPerYearMale": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "maxPerYearFemaleFertile": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "maxPerYearFemaleNonFertile": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "minWeightKg": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "minIntervalDays",
+          "maxPerYearMale",
+          "maxPerYearFemaleFertile",
+          "maxPerYearFemaleNonFertile",
+          "minWeightKg"
+        ]
+      },
+      "UpdateDonationTypeDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "minIntervalDays": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "maxPerYearMale": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "maxPerYearFemaleFertile": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "maxPerYearFemaleNonFertile": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "minWeightKg": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateDonationTypeIntervalDto": {
+        "type": "object",
+        "properties": {
+          "fromTypeId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "toTypeId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "minIntervalDays": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "fromTypeId",
+          "toTypeId",
+          "minIntervalDays"
+        ]
+      },
+      "UpdateDonationTypeIntervalDto": {
+        "type": "object",
+        "properties": {
+          "minIntervalDays": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "minIntervalDays"
+        ]
+      },
+      "CreateExamParameterDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          },
+          "refMinMale": {
+            "type": "number"
+          },
+          "refMaxMale": {
+            "type": "number"
+          },
+          "refMinFemale": {
+            "type": "number"
+          },
+          "refMaxFemale": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "unit",
+          "refMinMale",
+          "refMaxMale",
+          "refMinFemale",
+          "refMaxFemale"
+        ]
+      },
+      "UpdateExamParameterDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          },
+          "refMinMale": {
+            "type": "number"
+          },
+          "refMaxMale": {
+            "type": "number"
+          },
+          "refMinFemale": {
+            "type": "number"
+          },
+          "refMaxFemale": {
+            "type": "number"
+          }
+        }
+      },
+      "CreateStaffUserDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OPERATOR",
+              "DOCTOR",
+              "ADMIN"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "role"
+        ]
+      },
+      "UpdateUserRoleDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "GUEST",
+              "DONOR",
+              "OPERATOR",
+              "DOCTOR",
+              "ADMIN"
+            ]
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "CreateStaffProfileDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "centerId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "UpdateStaffProfileDto": {
+        "type": "object",
+        "properties": {
+          "centerId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "nullable": true
+          }
+        },
+        "required": [
+          "centerId"
+        ]
+      },
+      "CreateAnamnesisQuestionDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Z0-9_]+$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 500
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "formVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16
+          }
+        },
+        "required": [
+          "code",
+          "text",
+          "order",
+          "formVersion"
+        ]
+      },
+      "UpdateAnamnesisQuestionDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 500
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "formVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16
+          }
+        }
+      },
+      "CreateBookingDto": {
+        "type": "object",
+        "properties": {
+          "slotId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "donationTypeId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "slotId",
+          "donationTypeId"
+        ]
+      },
+      "CancelBookingDto": {
+        "type": "object",
+        "properties": {
+          "cancellationReason": {
+            "type": "string",
+            "enum": [
+              "DONOR_CANCELLED",
+              "OPERATOR_CANCELLED",
+              "NO_SHOW",
+              "FAILED_PRE_CHECK"
+            ]
+          }
+        }
+      },
+      "RescheduleBookingDto": {
+        "type": "object",
+        "properties": {
+          "newSlotId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "newSlotId"
+        ]
+      },
+      "CreateAnamnesisDto": {
+        "type": "object",
+        "properties": {
+          "formVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          },
+          "answers": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "questionCode": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "answer": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "questionCode",
+                "answer"
+              ]
+            }
+          }
+        },
+        "required": [
+          "formVersion",
+          "answers"
+        ]
+      },
+      "CreateCenterDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 200
+          },
+          "city": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "address": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 300
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 30
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          }
+        },
+        "required": [
+          "name",
+          "city",
+          "address",
+          "phone",
+          "email"
+        ]
+      },
+      "UpdateCenterDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 200
+          },
+          "city": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "address": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 300
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 30
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateDonationDto": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "donatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "bookingId",
+          "donatedAt"
+        ]
+      },
+      "CreateGdprRequestDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "EXPORT",
+              "DELETION",
+              "RECTIFICATION"
+            ]
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "HandleGdprRequestDto": {
+        "type": "object",
+        "properties": {
+          "notes": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        }
+      },
+      "CreateMedicalReportDto": {
+        "type": "object",
+        "properties": {
+          "donationId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "entries": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "parameterName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "unit": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50
+                },
+                "measuredValue": {
+                  "type": "number"
+                },
+                "refMin": {
+                  "type": "number"
+                },
+                "refMax": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "parameterName",
+                "unit",
+                "measuredValue",
+                "refMin",
+                "refMax"
+              ]
+            }
+          }
+        },
+        "required": [
+          "donationId",
+          "entries"
+        ]
+      },
+      "CreateClinicalNoteDto": {
+        "type": "object",
+        "properties": {
+          "donorId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 5000
+          }
+        },
+        "required": [
+          "donorId",
+          "content"
+        ]
+      },
+      "CreateExclusionDto": {
+        "type": "object",
+        "properties": {
+          "donorId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "TEMPORARY",
+              "PERMANENT"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          }
+        },
+        "required": [
+          "donorId",
+          "type",
+          "reason",
+          "startDate"
+        ]
+      },
+      "CloseExclusionDto": {
+        "type": "object",
+        "properties": {
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          }
+        },
+        "required": [
+          "endDate"
+        ]
+      },
+      "CreateDonorProfileDto": {
+        "type": "object",
+        "properties": {
+          "fiscalCode": {
+            "type": "string",
+            "pattern": "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "biologicalSex": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE"
+            ]
+          },
+          "bloodGroup": {
+            "default": "UNKNOWN",
+            "type": "string",
+            "enum": [
+              "A_POSITIVE",
+              "A_NEGATIVE",
+              "B_POSITIVE",
+              "B_NEGATIVE",
+              "AB_POSITIVE",
+              "AB_NEGATIVE",
+              "O_POSITIVE",
+              "O_NEGATIVE",
+              "UNKNOWN"
+            ]
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 45
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 30
+          },
+          "consentGiven": {
+            "type": "boolean"
+          },
+          "consentVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "fiscalCode",
+          "firstName",
+          "lastName",
+          "dateOfBirth",
+          "biologicalSex",
+          "weight",
+          "phone",
+          "consentGiven"
+        ]
+      },
+      "UpdateDonorProfileDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 30
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 45
+          },
+          "bloodGroup": {
+            "type": "string",
+            "enum": [
+              "A_POSITIVE",
+              "A_NEGATIVE",
+              "B_POSITIVE",
+              "B_NEGATIVE",
+              "AB_POSITIVE",
+              "AB_NEGATIVE",
+              "O_POSITIVE",
+              "O_NEGATIVE",
+              "UNKNOWN"
+            ]
+          }
+        }
+      },
+      "UpdateConsentDto": {
+        "type": "object",
+        "properties": {
+          "consentGiven": {
+            "type": "boolean"
+          },
+          "consentVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "consentGiven"
+        ]
+      },
+      "CreateSlotDto": {
+        "type": "object",
+        "properties": {
+          "centerId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "donationTypeId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "startTime": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}$"
+          },
+          "endTime": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}$"
+          },
+          "capacity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "centerId",
+          "donationTypeId",
+          "date",
+          "startTime",
+          "endTime",
+          "capacity"
+        ]
+      },
+      "UpdateSlotDto": {
+        "type": "object",
+        "properties": {
+          "startTime": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}$"
+          },
+          "endTime": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}$"
+          },
+          "capacity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        }
+      }
+    }
+  }
+}
