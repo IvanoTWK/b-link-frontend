@@ -31,7 +31,14 @@
         },
         "responses": {
           "201": {
-            "description": "Account creato. Restituisce accessToken; refreshToken impostato come cookie HttpOnly."
+            "description": "Account creato. Restituisce accessToken; refreshToken impostato come cookie HttpOnly.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessTokenResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Dati non validi (validazione Zod)."
@@ -62,7 +69,14 @@
         },
         "responses": {
           "200": {
-            "description": "Credenziali valide. Se non è richiesta la 2FA: accessToken + cookie. Se è richiesta la 2FA: { action, preAuthToken }."
+            "description": "Credenziali valide e 2FA non richiesta: accessToken + cookie refreshToken.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginSuccessResponseDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Credenziali non valide."
@@ -83,7 +97,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Nuovo accessToken + refresh cookie ruotato."
+            "description": "Nuovo accessToken + refresh cookie ruotato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessTokenResponseDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Refresh token mancante, scaduto o revocato."
@@ -129,7 +150,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "{ userId, role }"
+            "description": "Payload del JWT: userId, role, tokenVersion.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthMeResponseDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Access token mancante o revocato."
@@ -162,7 +190,14 @@
         },
         "responses": {
           "200": {
-            "description": "{ ok: true }"
+            "description": "{ ok: true }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Token non valido o scaduto."
@@ -190,7 +225,14 @@
         },
         "responses": {
           "200": {
-            "description": "Risponde sempre 200 per evitare user enumeration."
+            "description": "Risponde sempre 200 per evitare user enumeration.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Reinvia email di verifica",
@@ -215,7 +257,14 @@
         },
         "responses": {
           "200": {
-            "description": "Risponde sempre 200 per evitare user enumeration."
+            "description": "Risponde sempre 200 per evitare user enumeration.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Avvia il flusso di reset password",
@@ -240,7 +289,14 @@
         },
         "responses": {
           "200": {
-            "description": "{ ok: true }. Tutte le sessioni attive vengono chiuse."
+            "description": "{ ok: true }. Tutte le sessioni attive vengono chiuse.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Token non valido o scaduto."
@@ -268,7 +324,14 @@
         },
         "responses": {
           "200": {
-            "description": "{ ok: true }. Le altre sessioni attive vengono chiuse."
+            "description": "{ ok: true }. Le altre sessioni attive vengono chiuse.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Password attuale errata o token revocato."
@@ -363,7 +426,14 @@
         ],
         "responses": {
           "200": {
-            "description": "{ items, nextCursor }"
+            "description": "{ items, nextCursor }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAuditLogResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -383,7 +453,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "{ secret, otpauthUrl } — mostrare il QR code all'utente."
+            "description": "{ secret, otpauthUrl } — mostrare il QR code all'utente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoFactorSetupResponseDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Pre-auth token mancante, scaduto o con phase errato."
@@ -416,7 +493,14 @@
         },
         "responses": {
           "200": {
-            "description": "{ accessToken, backupCodes } — i backup codes vanno mostrati una sola volta."
+            "description": "{ accessToken, backupCodes } — i backup codes vanno mostrati una sola volta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoFactorActivateResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Setup 2FA non avviato."
@@ -452,7 +536,14 @@
         },
         "responses": {
           "200": {
-            "description": "{ accessToken } + cookie refreshToken."
+            "description": "{ accessToken } + cookie refreshToken.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoFactorVerifyResponseDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Codice TOTP non valido o pre-auth token scaduto."
@@ -485,7 +576,14 @@
         },
         "responses": {
           "200": {
-            "description": "{ accessToken } + cookie refreshToken. Il codice usato viene eliminato."
+            "description": "{ accessToken } + cookie refreshToken. Il codice usato viene eliminato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoFactorVerifyResponseDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Codice di backup non valido o pre-auth token scaduto."
@@ -508,7 +606,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "{ secret, otpauthUrl } — mostrare il QR code all'utente. Confermare con /auth/2fa/enable/confirm."
+            "description": "{ secret, otpauthUrl } — mostrare il QR code all'utente. Confermare con /auth/2fa/enable/confirm.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoFactorSetupResponseDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Access token mancante o revocato."
@@ -547,7 +652,14 @@
         },
         "responses": {
           "200": {
-            "description": "{ backupCodes } — mostrare una sola volta. La sessione corrente rimane valida."
+            "description": "{ backupCodes } — mostrare una sola volta. La sessione corrente rimane valida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoFactorEnableConfirmResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Setup 2FA non avviato per questo account."
@@ -589,7 +701,14 @@
         },
         "responses": {
           "200": {
-            "description": "{ ok: true }. La sessione corrente viene chiusa."
+            "description": "{ ok: true }. La sessione corrente viene chiusa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "2FA non attivo per questo account."
@@ -618,7 +737,17 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Array di DonationType."
+            "description": "Array di DonationType.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DonationTypeResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Lista tipi di donazione attivi (pubblico)",
@@ -641,7 +770,14 @@
         },
         "responses": {
           "201": {
-            "description": "DonationType creato."
+            "description": "DonationType creato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonationTypeResponseDto"
+                }
+              }
+            }
           },
           "409": {
             "description": "Codice già utilizzato."
@@ -673,7 +809,14 @@
         ],
         "responses": {
           "200": {
-            "description": "DonationType con intervalsFrom e intervalsTo."
+            "description": "DonationType con intervalsFrom e intervalsTo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonationTypeWithIntervalsResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Tipo non trovato."
@@ -708,7 +851,14 @@
         },
         "responses": {
           "200": {
-            "description": "DonationType aggiornato."
+            "description": "DonationType aggiornato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonationTypeResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Tipo non trovato."
@@ -744,7 +894,14 @@
         },
         "responses": {
           "201": {
-            "description": "DonationTypeInterval creato."
+            "description": "DonationTypeInterval creato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonationTypeIntervalResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "fromTypeId uguale a toTypeId."
@@ -792,7 +949,14 @@
         },
         "responses": {
           "200": {
-            "description": "DonationTypeInterval aggiornato."
+            "description": "DonationTypeInterval aggiornato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonationTypeIntervalResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Intervallo non trovato."
@@ -845,7 +1009,17 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Array di ExamParameter."
+            "description": "Array di ExamParameter.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExamParameterResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -873,7 +1047,14 @@
         },
         "responses": {
           "201": {
-            "description": "ExamParameter creato."
+            "description": "ExamParameter creato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamParameterResponseDto"
+                }
+              }
+            }
           },
           "409": {
             "description": "Parametro con lo stesso nome già esistente."
@@ -915,7 +1096,14 @@
         },
         "responses": {
           "200": {
-            "description": "ExamParameter aggiornato."
+            "description": "ExamParameter aggiornato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamParameterResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Parametro non trovato."
@@ -1032,7 +1220,14 @@
         ],
         "responses": {
           "200": {
-            "description": "{ items, nextCursor }"
+            "description": "{ items, nextCursor }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedUserResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1060,7 +1255,14 @@
         },
         "responses": {
           "201": {
-            "description": "Utente creato. Email con link reset inviata."
+            "description": "Utente creato. Email con link reset inviata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
           },
           "409": {
             "description": "Email già registrata."
@@ -1102,7 +1304,14 @@
         },
         "responses": {
           "200": {
-            "description": "Ruolo aggiornato."
+            "description": "Ruolo aggiornato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Utente non trovato."
@@ -1173,7 +1382,14 @@
         },
         "responses": {
           "201": {
-            "description": "StaffProfile creato."
+            "description": "StaffProfile creato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffProfileAdminResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Utente non trovato."
@@ -1218,7 +1434,14 @@
         },
         "responses": {
           "200": {
-            "description": "StaffProfile aggiornato."
+            "description": "StaffProfile aggiornato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffProfileAdminResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Profilo staff non trovato."
@@ -1250,7 +1473,14 @@
         ],
         "responses": {
           "200": {
-            "description": "{ ok: true }. Al prossimo login verrà richiesto un nuovo setup 2FA."
+            "description": "{ ok: true }. Al prossimo login verrà richiesto un nuovo setup 2FA.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Utente non staff o 2FA non attivo."
@@ -1294,7 +1524,17 @@
         ],
         "responses": {
           "200": {
-            "description": "Lista domande ordinate per version desc, order asc."
+            "description": "Lista domande ordinate per version desc, order asc.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AnamnesisQuestionResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1322,7 +1562,14 @@
         },
         "responses": {
           "201": {
-            "description": "Domanda creata."
+            "description": "Domanda creata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnamnesisQuestionResponseDto"
+                }
+              }
+            }
           },
           "409": {
             "description": "Codice già esistente."
@@ -1364,7 +1611,14 @@
         },
         "responses": {
           "200": {
-            "description": "Domanda aggiornata."
+            "description": "Domanda aggiornata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnamnesisQuestionResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Domanda non trovata."
@@ -1394,7 +1648,14 @@
         ],
         "responses": {
           "200": {
-            "description": "{ ok: true }"
+            "description": "{ ok: true }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Già disattivata."
@@ -1430,7 +1691,14 @@
         },
         "responses": {
           "201": {
-            "description": "Prenotazione confermata."
+            "description": "Prenotazione confermata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Slot non disponibile o vincolo clinico violato."
@@ -1532,7 +1800,14 @@
         ],
         "responses": {
           "200": {
-            "description": "{ items, nextCursor }"
+            "description": "{ items, nextCursor }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedBookingResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1561,7 +1836,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Prenotazione."
+            "description": "Prenotazione.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponseDto"
+                }
+              }
+            }
           },
           "403": {
             "description": "DONOR non può vedere prenotazioni altrui."
@@ -1606,7 +1888,14 @@
         },
         "responses": {
           "200": {
-            "description": "Prenotazione cancellata."
+            "description": "Prenotazione cancellata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Stato non cancellabile."
@@ -1654,7 +1943,14 @@
         },
         "responses": {
           "200": {
-            "description": "Prenotazione spostata al nuovo slot."
+            "description": "Prenotazione spostata al nuovo slot.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Stato non consentito, deadline superata, slot non disponibile o tipo diverso."
@@ -1702,7 +1998,14 @@
         },
         "responses": {
           "201": {
-            "description": "Questionario salvato."
+            "description": "Questionario salvato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnamnesisFormResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Prenotazione cancellata o questionario già compilato."
@@ -1738,7 +2041,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Questionario anamnestico."
+            "description": "Questionario anamnestico.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnamnesisFormResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Prenotazione o questionario non trovato."
@@ -1816,7 +2126,14 @@
         ],
         "responses": {
           "200": {
-            "description": "{ items, nextCursor }. In geo-search items includono distance_km."
+            "description": "{ items, nextCursor }. In geo-search items includono distance_km.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedCenterResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Lista centri attivi (pubblico). Con lat+lon attiva geo-search haversine ordinato per distanza.",
@@ -1839,7 +2156,14 @@
         },
         "responses": {
           "201": {
-            "description": "Centro creato."
+            "description": "Centro creato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CenterResponseDto"
+                }
+              }
+            }
           },
           "409": {
             "description": "Centro già esistente."
@@ -1871,7 +2195,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Centro con staff."
+            "description": "Centro con staff.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CenterResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Centro non trovato."
@@ -1906,7 +2237,14 @@
         },
         "responses": {
           "200": {
-            "description": "Centro aggiornato."
+            "description": "Centro aggiornato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CenterResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Centro non trovato."
@@ -1972,7 +2310,14 @@
         },
         "responses": {
           "201": {
-            "description": "Donazione registrata, booking → IN_AWAITING_REPORT."
+            "description": "Donazione registrata, booking → IN_AWAITING_REPORT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonationResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Booking non CONFIRMED o donazione già presente."
@@ -2060,7 +2405,14 @@
         ],
         "responses": {
           "200": {
-            "description": "{ items, nextCursor }"
+            "description": "{ items, nextCursor }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedDonationResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2089,7 +2441,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Donazione con booking, centro e tipo."
+            "description": "Donazione con booking, centro e tipo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonationResponseDto"
+                }
+              }
+            }
           },
           "403": {
             "description": "DONOR non può vedere donazioni altrui."
@@ -2125,7 +2484,14 @@
         },
         "responses": {
           "201": {
-            "description": "Richiesta creata."
+            "description": "Richiesta creata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GdprRequestResponseDto"
+                }
+              }
+            }
           },
           "409": {
             "description": "Esiste già una richiesta pendente dello stesso tipo."
@@ -2193,7 +2559,14 @@
         ],
         "responses": {
           "200": {
-            "description": "{ items, nextCursor }"
+            "description": "{ items, nextCursor }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedGdprRequestResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2222,7 +2595,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Richiesta GDPR."
+            "description": "Richiesta GDPR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GdprRequestResponseDto"
+                }
+              }
+            }
           },
           "403": {
             "description": "DONOR tenta di accedere a richiesta altrui."
@@ -2257,7 +2637,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Richiesta annullata."
+            "description": "Richiesta annullata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GdprRequestResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Richiesta non più in stato PENDING."
@@ -2305,7 +2692,14 @@
         },
         "responses": {
           "200": {
-            "description": "Richiesta gestita. Per EXPORT include exportData."
+            "description": "Richiesta gestita. Per EXPORT include exportData.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GdprRequestResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Richiesta già completata."
@@ -2359,7 +2753,17 @@
         ],
         "responses": {
           "200": {
-            "description": "Array di profili donatore con conteggio donazioni completate."
+            "description": "Array di profili donatore con conteggio donazioni completate.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DonorSearchResultResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2389,7 +2793,14 @@
         },
         "responses": {
           "201": {
-            "description": "Referto creato."
+            "description": "Referto creato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalReportResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Booking non IN_AWAITING_REPORT o referto già presente."
@@ -2467,7 +2878,14 @@
         ],
         "responses": {
           "200": {
-            "description": "{ items, nextCursor }"
+            "description": "{ items, nextCursor }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedMedicalReportResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2496,7 +2914,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Referto."
+            "description": "Referto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalReportResponseDto"
+                }
+              }
+            }
           },
           "403": {
             "description": "DONOR non può vedere referti altrui."
@@ -2532,7 +2957,14 @@
         },
         "responses": {
           "201": {
-            "description": "Nota creata."
+            "description": "Nota creata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalNoteResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Donatore non trovato."
@@ -2562,7 +2994,17 @@
         ],
         "responses": {
           "200": {
-            "description": "Lista note."
+            "description": "Lista note.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClinicalNoteResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2592,7 +3034,14 @@
         },
         "responses": {
           "201": {
-            "description": "Esclusione creata."
+            "description": "Esclusione creata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExclusionResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Donatore non trovato."
@@ -2622,7 +3071,17 @@
         ],
         "responses": {
           "200": {
-            "description": "Lista esclusioni attive."
+            "description": "Lista esclusioni attive.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExclusionResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2661,7 +3120,14 @@
         },
         "responses": {
           "200": {
-            "description": "{ ok: true }"
+            "description": "{ ok: true }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Esclusione permanente o già chiusa."
@@ -2720,7 +3186,14 @@
         ],
         "responses": {
           "200": {
-            "description": "{ total, byCenter, byDonationType }"
+            "description": "{ total, byCenter, byDonationType }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonationStatsResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2740,7 +3213,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "{ total, byBloodGroup, byBiologicalSex, newPerMonth }"
+            "description": "{ total, byBloodGroup, byBiologicalSex, newPerMonth }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonorStatsResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2793,7 +3273,17 @@
         ],
         "responses": {
           "200": {
-            "description": "[ { center, slotCount, totalCapacity, totalBooked, occupancyRate } ]"
+            "description": "[ { center, slotCount, totalCapacity, totalBooked, occupancyRate } ]",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SlotOccupancyStatResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2836,7 +3326,14 @@
         ],
         "responses": {
           "200": {
-            "description": "{ total, byStatus, cancellationsByReason }"
+            "description": "{ total, byStatus, cancellationsByReason }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingStatsResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2866,7 +3363,14 @@
         },
         "responses": {
           "201": {
-            "description": "Profilo creato."
+            "description": "Profilo creato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonorProfileResponseDto"
+                }
+              }
+            }
           },
           "409": {
             "description": "Profilo già esistente o codice fiscale duplicato."
@@ -2887,7 +3391,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Profilo del donatore."
+            "description": "Profilo del donatore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonorProfileResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Profilo non trovato."
@@ -2918,7 +3429,14 @@
         },
         "responses": {
           "200": {
-            "description": "Profilo aggiornato."
+            "description": "Profilo aggiornato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonorProfileResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Profilo non trovato."
@@ -2951,7 +3469,14 @@
         },
         "responses": {
           "200": {
-            "description": "Profilo con consenso aggiornato."
+            "description": "Profilo con consenso aggiornato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonorProfileResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Profilo non trovato."
@@ -3039,7 +3564,14 @@
         ],
         "responses": {
           "200": {
-            "description": "{ items, nextCursor }"
+            "description": "{ items, nextCursor }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedDonorProfileResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3068,7 +3600,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Profilo donatore."
+            "description": "Profilo donatore.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonorProfileResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Profilo non trovato."
@@ -3117,7 +3656,17 @@
         ],
         "responses": {
           "200": {
-            "description": "Lista slot con campo availability."
+            "description": "Lista slot con campo availability.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SlotResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3145,7 +3694,14 @@
         },
         "responses": {
           "201": {
-            "description": "Slot creato."
+            "description": "Slot creato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlotResponseDto"
+                }
+              }
+            }
           },
           "403": {
             "description": "OPERATOR non assegnato a nessun centro o tenta altro centro."
@@ -3187,7 +3743,14 @@
         },
         "responses": {
           "200": {
-            "description": "Slot aggiornato."
+            "description": "Slot aggiornato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlotResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Slot con prenotazioni attive."
@@ -3223,7 +3786,14 @@
         ],
         "responses": {
           "200": {
-            "description": "{ ok: true }"
+            "description": "{ ok: true }",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Esistono prenotazioni attive."
@@ -3305,6 +3875,19 @@
           "password"
         ]
       },
+      "AccessTokenResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "description": "JWT access token a breve scadenza. Tenere in memoria, non in localStorage."
+          }
+        },
+        "required": [
+          "accessToken"
+        ]
+      },
       "LoginDto": {
         "type": "object",
         "properties": {
@@ -3323,6 +3906,51 @@
           "password"
         ]
       },
+      "LoginSuccessResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "description": "JWT access token. Il refresh token viene impostato come cookie HttpOnly."
+          }
+        },
+        "required": [
+          "accessToken"
+        ]
+      },
+      "AuthMeResponseDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "example": "clxyz123",
+            "description": "ID univoco dell'utente."
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "GUEST",
+              "DONOR",
+              "OPERATOR",
+              "DOCTOR",
+              "ADMIN"
+            ],
+            "example": "DONOR",
+            "description": "Ruolo dell'utente."
+          },
+          "tokenVersion": {
+            "type": "number",
+            "example": 1,
+            "description": "Versione del token: incrementa a ogni logout/reset password per invalidare i token precedenti."
+          }
+        },
+        "required": [
+          "userId",
+          "role",
+          "tokenVersion"
+        ]
+      },
       "VerifyEmailConfirmDto": {
         "type": "object",
         "properties": {
@@ -3333,6 +3961,19 @@
         },
         "required": [
           "token"
+        ]
+      },
+      "OkResponseDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": true,
+            "description": "Operazione completata."
+          }
+        },
+        "required": [
+          "ok"
         ]
       },
       "VerifyEmailResendDto": {
@@ -3395,6 +4036,108 @@
           "newPassword"
         ]
       },
+      "AuditLogResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "staffId": {
+            "type": "object",
+            "nullable": true,
+            "example": "clxyz456",
+            "description": "ID utente che ha eseguito l'azione."
+          },
+          "action": {
+            "type": "string",
+            "example": "AUTH_LOGIN_SUCCESS"
+          },
+          "entityType": {
+            "type": "object",
+            "nullable": true,
+            "example": "Booking"
+          },
+          "entityId": {
+            "type": "object",
+            "nullable": true,
+            "example": "clxyz789"
+          },
+          "ipAddress": {
+            "type": "object",
+            "nullable": true,
+            "example": "192.168.1.1"
+          },
+          "userAgent": {
+            "type": "object",
+            "nullable": true,
+            "example": "Mozilla/5.0..."
+          },
+          "metadata": {
+            "type": "object",
+            "nullable": true,
+            "example": {
+              "bookingId": "clxyz123"
+            },
+            "description": "Dati aggiuntivi specifici per l'azione."
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-06-15T10:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "staffId",
+          "action",
+          "entityType",
+          "entityId",
+          "ipAddress",
+          "userAgent",
+          "metadata",
+          "createdAt"
+        ]
+      },
+      "PaginatedAuditLogResponseDto": {
+        "type": "object",
+        "properties": {
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "example": "clxyz123",
+            "description": "Cursore per la pagina successiva. null se non esistono altri elementi."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditLogResponseDto"
+            }
+          }
+        },
+        "required": [
+          "nextCursor",
+          "items"
+        ]
+      },
+      "TwoFactorSetupResponseDto": {
+        "type": "object",
+        "properties": {
+          "secret": {
+            "type": "string",
+            "example": "JBSWY3DPEHPK3PXP",
+            "description": "Segreto TOTP in formato Base32. Non mostrare in chiaro dopo il setup."
+          },
+          "otpauthUrl": {
+            "type": "string",
+            "example": "otpauth://totp/B-Link:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=B-Link",
+            "description": "URL otpauth da codificare come QR code per le app authenticator."
+          }
+        },
+        "required": [
+          "secret",
+          "otpauthUrl"
+        ]
+      },
       "TwoFactorCodeDto": {
         "type": "object",
         "properties": {
@@ -3409,6 +4152,44 @@
           "code"
         ]
       },
+      "TwoFactorActivateResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "description": "JWT access token valido. Il refresh token viene impostato come cookie HttpOnly."
+          },
+          "backupCodes": {
+            "example": [
+              "ABCD-1234",
+              "EFGH-5678"
+            ],
+            "description": "Codici di backup monouso. Mostrarli una sola volta: non vengono mai più recuperati.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "accessToken",
+          "backupCodes"
+        ]
+      },
+      "TwoFactorVerifyResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "description": "JWT access token valido. Il refresh token viene impostato come cookie HttpOnly."
+          }
+        },
+        "required": [
+          "accessToken"
+        ]
+      },
       "BackupCodeDto": {
         "type": "object",
         "properties": {
@@ -3419,6 +4200,179 @@
         },
         "required": [
           "backupCode"
+        ]
+      },
+      "TwoFactorEnableConfirmResponseDto": {
+        "type": "object",
+        "properties": {
+          "backupCodes": {
+            "example": [
+              "ABCD-1234",
+              "EFGH-5678"
+            ],
+            "description": "Codici di backup monouso. Mostrarli una sola volta: non vengono mai più recuperati.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "backupCodes"
+        ]
+      },
+      "DonationTypeResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "code": {
+            "type": "string",
+            "example": "SANGUE_INTERO"
+          },
+          "name": {
+            "type": "string",
+            "example": "Sangue Intero"
+          },
+          "minIntervalDays": {
+            "type": "number",
+            "example": 90,
+            "description": "Giorni minimi tra donazioni dello stesso tipo."
+          },
+          "maxPerYearMale": {
+            "type": "number",
+            "example": 4
+          },
+          "maxPerYearFemaleFertile": {
+            "type": "number",
+            "example": 2
+          },
+          "maxPerYearFemaleNonFertile": {
+            "type": "number",
+            "example": 4
+          },
+          "minWeightKg": {
+            "type": "number",
+            "example": 50,
+            "description": "Peso minimo in kg."
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "minIntervalDays",
+          "maxPerYearMale",
+          "maxPerYearFemaleFertile",
+          "maxPerYearFemaleNonFertile",
+          "minWeightKg",
+          "isActive"
+        ]
+      },
+      "DonationTypeIntervalResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "fromTypeId": {
+            "type": "string",
+            "example": "clxyz456",
+            "description": "ID tipo sorgente."
+          },
+          "toTypeId": {
+            "type": "string",
+            "example": "clxyz789",
+            "description": "ID tipo destinazione."
+          },
+          "intervalDays": {
+            "type": "number",
+            "example": 30,
+            "description": "Giorni di attesa incrociati."
+          }
+        },
+        "required": [
+          "id",
+          "fromTypeId",
+          "toTypeId",
+          "intervalDays"
+        ]
+      },
+      "DonationTypeWithIntervalsResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "code": {
+            "type": "string",
+            "example": "SANGUE_INTERO"
+          },
+          "name": {
+            "type": "string",
+            "example": "Sangue Intero"
+          },
+          "minIntervalDays": {
+            "type": "number",
+            "example": 90,
+            "description": "Giorni minimi tra donazioni dello stesso tipo."
+          },
+          "maxPerYearMale": {
+            "type": "number",
+            "example": 4
+          },
+          "maxPerYearFemaleFertile": {
+            "type": "number",
+            "example": 2
+          },
+          "maxPerYearFemaleNonFertile": {
+            "type": "number",
+            "example": 4
+          },
+          "minWeightKg": {
+            "type": "number",
+            "example": 50,
+            "description": "Peso minimo in kg."
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "intervalsFrom": {
+            "description": "Intervalli in cui questo tipo è la sorgente.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DonationTypeIntervalResponseDto"
+            }
+          },
+          "intervalsTo": {
+            "description": "Intervalli in cui questo tipo è la destinazione.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DonationTypeIntervalResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "minIntervalDays",
+          "maxPerYearMale",
+          "maxPerYearFemaleFertile",
+          "maxPerYearFemaleNonFertile",
+          "minWeightKg",
+          "isActive",
+          "intervalsFrom",
+          "intervalsTo"
         ]
       },
       "CreateDonationTypeDto": {
@@ -3544,6 +4498,45 @@
           "minIntervalDays"
         ]
       },
+      "ExamParameterResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "name": {
+            "type": "string",
+            "example": "Emoglobina"
+          },
+          "unit": {
+            "type": "string",
+            "example": "g/dL"
+          },
+          "refMin": {
+            "type": "number",
+            "example": 12,
+            "description": "Valore minimo di riferimento."
+          },
+          "refMax": {
+            "type": "number",
+            "example": 17.5,
+            "description": "Valore massimo di riferimento."
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "unit",
+          "refMin",
+          "refMax",
+          "isActive"
+        ]
+      },
       "CreateExamParameterDto": {
         "type": "object",
         "properties": {
@@ -3605,6 +4598,210 @@
             "type": "number"
           }
         }
+      },
+      "DonorProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "userId": {
+            "type": "string",
+            "example": "clxyz456",
+            "description": "ID dell'utente associato."
+          },
+          "fiscalCode": {
+            "type": "string",
+            "example": "RSSMRA85T10F205Z"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Mario"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Rossi"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "example": "1985-01-10",
+            "description": "Formato YYYY-MM-DD."
+          },
+          "biologicalSex": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE"
+            ],
+            "example": "MALE"
+          },
+          "bloodGroup": {
+            "type": "string",
+            "enum": [
+              "A_POSITIVE",
+              "A_NEGATIVE",
+              "B_POSITIVE",
+              "B_NEGATIVE",
+              "AB_POSITIVE",
+              "AB_NEGATIVE",
+              "O_POSITIVE",
+              "O_NEGATIVE",
+              "UNKNOWN"
+            ],
+            "example": "A_POSITIVE"
+          },
+          "weight": {
+            "type": "number",
+            "example": 75
+          },
+          "phone": {
+            "type": "string",
+            "example": "+39 333 1234567"
+          },
+          "consentGiven": {
+            "type": "boolean",
+            "example": true
+          },
+          "consentDate": {
+            "type": "object",
+            "nullable": true,
+            "example": "2024-01-01T00:00:00.000Z"
+          },
+          "consentVersion": {
+            "type": "object",
+            "nullable": true,
+            "example": "v1.0"
+          },
+          "deletedAt": {
+            "type": "object",
+            "nullable": true,
+            "example": null,
+            "description": "Non-null se il profilo è stato soft-deleted."
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "fiscalCode",
+          "firstName",
+          "lastName",
+          "dateOfBirth",
+          "biologicalSex",
+          "bloodGroup",
+          "weight",
+          "phone",
+          "consentGiven",
+          "consentDate",
+          "consentVersion",
+          "deletedAt"
+        ]
+      },
+      "StaffProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "userId": {
+            "type": "string",
+            "example": "clxyz456"
+          },
+          "centerId": {
+            "type": "object",
+            "nullable": true,
+            "example": "clxyz789"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "centerId"
+        ]
+      },
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "name": {
+            "type": "string",
+            "example": "Mario Rossi"
+          },
+          "email": {
+            "type": "string",
+            "example": "mario.rossi@example.com"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "GUEST",
+              "DONOR",
+              "OPERATOR",
+              "DOCTOR",
+              "ADMIN"
+            ],
+            "example": "DONOR"
+          },
+          "emailVerified": {
+            "type": "boolean",
+            "example": true
+          },
+          "twoFactorEnabled": {
+            "type": "boolean",
+            "example": false
+          },
+          "lockedAt": {
+            "type": "object",
+            "nullable": true,
+            "example": null,
+            "description": "Non-null se account bloccato."
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          },
+          "donorProfile": {
+            "$ref": "#/components/schemas/DonorProfileResponseDto"
+          },
+          "staffProfile": {
+            "$ref": "#/components/schemas/StaffProfileResponseDto"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "role",
+          "emailVerified",
+          "twoFactorEnabled",
+          "lockedAt",
+          "createdAt"
+        ]
+      },
+      "PaginatedUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "example": "clxyz123",
+            "description": "Cursore per la pagina successiva. null se non esistono altri elementi."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserResponseDto"
+            }
+          }
+        },
+        "required": [
+          "nextCursor",
+          "items"
+        ]
       },
       "CreateStaffUserDto": {
         "type": "object",
@@ -3670,6 +4867,29 @@
           "userId"
         ]
       },
+      "StaffProfileAdminResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "userId": {
+            "type": "string",
+            "example": "clxyz456"
+          },
+          "centerId": {
+            "type": "object",
+            "nullable": true,
+            "example": "clxyz789"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "centerId"
+        ]
+      },
       "UpdateStaffProfileDto": {
         "type": "object",
         "properties": {
@@ -3682,6 +4902,43 @@
         },
         "required": [
           "centerId"
+        ]
+      },
+      "AnamnesisQuestionResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "code": {
+            "type": "string",
+            "example": "FEVER_LAST_WEEK"
+          },
+          "text": {
+            "type": "string",
+            "example": "Hai avuto febbre negli ultimi 7 giorni?"
+          },
+          "order": {
+            "type": "number",
+            "example": 1
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "formVersion": {
+            "type": "string",
+            "example": "2024-01-01"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "text",
+          "order",
+          "isActive",
+          "formVersion"
         ]
       },
       "CreateAnamnesisQuestionDto": {
@@ -3755,6 +5012,326 @@
           "donationTypeId"
         ]
       },
+      "CenterResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "name": {
+            "type": "string",
+            "example": "Centro Trasfusionale Milano"
+          },
+          "city": {
+            "type": "string",
+            "example": "Milano"
+          },
+          "address": {
+            "type": "string",
+            "example": "Via Roma 1"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+39 02 1234567"
+          },
+          "email": {
+            "type": "string",
+            "example": "centro.milano@blink.it"
+          },
+          "latitude": {
+            "type": "object",
+            "nullable": true,
+            "example": 45.464664
+          },
+          "longitude": {
+            "type": "object",
+            "nullable": true,
+            "example": 9.18854
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "distance_km": {
+            "type": "number",
+            "nullable": true,
+            "example": 2.3,
+            "description": "Presente solo in geo-search."
+          },
+          "staff": {
+            "description": "Presente solo nel dettaglio del centro.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StaffProfileResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "city",
+          "address",
+          "phone",
+          "email",
+          "latitude",
+          "longitude",
+          "isActive"
+        ]
+      },
+      "SlotResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "centerId": {
+            "type": "string",
+            "example": "clxyz456"
+          },
+          "donationTypeId": {
+            "type": "string",
+            "example": "clxyz789"
+          },
+          "date": {
+            "type": "string",
+            "example": "2024-06-15",
+            "description": "Formato YYYY-MM-DD."
+          },
+          "startTime": {
+            "type": "string",
+            "example": "08:00",
+            "description": "Formato HH:mm."
+          },
+          "endTime": {
+            "type": "string",
+            "example": "09:00",
+            "description": "Formato HH:mm."
+          },
+          "capacity": {
+            "type": "number",
+            "example": 10
+          },
+          "bookedCount": {
+            "type": "number",
+            "example": 3
+          },
+          "availability": {
+            "type": "number",
+            "example": 7,
+            "description": "capacity - bookedCount."
+          },
+          "center": {
+            "$ref": "#/components/schemas/CenterResponseDto"
+          },
+          "donationType": {
+            "$ref": "#/components/schemas/DonationTypeResponseDto"
+          }
+        },
+        "required": [
+          "id",
+          "centerId",
+          "donationTypeId",
+          "date",
+          "startTime",
+          "endTime",
+          "capacity",
+          "bookedCount",
+          "availability"
+        ]
+      },
+      "DonationInBookingResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "bookingId": {
+            "type": "string",
+            "example": "clxyz456"
+          },
+          "donorId": {
+            "type": "string",
+            "example": "clxyz789"
+          },
+          "centerId": {
+            "type": "string",
+            "example": "clxyz012"
+          },
+          "donationTypeId": {
+            "type": "string",
+            "example": "clxyz345"
+          },
+          "donatedAt": {
+            "type": "string",
+            "example": "2024-06-15T09:00:00.000Z"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-06-15T09:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "bookingId",
+          "donorId",
+          "centerId",
+          "donationTypeId",
+          "donatedAt",
+          "createdAt"
+        ]
+      },
+      "AnamnesisAnswerResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "questionCode": {
+            "type": "string",
+            "example": "FEVER_LAST_WEEK"
+          },
+          "answer": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "required": [
+          "id",
+          "questionCode",
+          "answer"
+        ]
+      },
+      "AnamnesisFormResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "bookingId": {
+            "type": "string",
+            "example": "clxyz456"
+          },
+          "formVersion": {
+            "type": "string",
+            "example": "2024-01-01"
+          },
+          "compiledAt": {
+            "type": "string",
+            "example": "2024-06-15T08:30:00.000Z"
+          },
+          "answers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnamnesisAnswerResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "bookingId",
+          "formVersion",
+          "compiledAt",
+          "answers"
+        ]
+      },
+      "BookingResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "donorId": {
+            "type": "string",
+            "example": "clxyz456"
+          },
+          "slotId": {
+            "type": "string",
+            "example": "clxyz789"
+          },
+          "donationTypeId": {
+            "type": "string",
+            "example": "clxyz012"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "IN_AWAITING_REPORT",
+              "COMPLETED",
+              "CANCELLED"
+            ],
+            "example": "CONFIRMED"
+          },
+          "cancellationReason": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "DONOR_CANCELLED",
+              "OPERATOR_CANCELLED",
+              "NO_SHOW",
+              "FAILED_PRE_CHECK"
+            ],
+            "example": null
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-06-01T10:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2024-06-01T10:00:00.000Z"
+          },
+          "slot": {
+            "$ref": "#/components/schemas/SlotResponseDto"
+          },
+          "donationType": {
+            "$ref": "#/components/schemas/DonationTypeResponseDto"
+          },
+          "donation": {
+            "$ref": "#/components/schemas/DonationInBookingResponseDto"
+          },
+          "anamnesisForm": {
+            "$ref": "#/components/schemas/AnamnesisFormResponseDto"
+          }
+        },
+        "required": [
+          "id",
+          "donorId",
+          "slotId",
+          "donationTypeId",
+          "status",
+          "cancellationReason",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PaginatedBookingResponseDto": {
+        "type": "object",
+        "properties": {
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "example": "clxyz123",
+            "description": "Cursore per la pagina successiva. null se non esistono altri elementi."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookingResponseDto"
+            }
+          }
+        },
+        "required": [
+          "nextCursor",
+          "items"
+        ]
+      },
       "CancelBookingDto": {
         "type": "object",
         "properties": {
@@ -3815,6 +5392,27 @@
         "required": [
           "formVersion",
           "answers"
+        ]
+      },
+      "PaginatedCenterResponseDto": {
+        "type": "object",
+        "properties": {
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "example": "clxyz123",
+            "description": "Cursore per la pagina successiva. null se non esistono altri elementi."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CenterResponseDto"
+            }
+          }
+        },
+        "required": [
+          "nextCursor",
+          "items"
         ]
       },
       "CreateCenterDto": {
@@ -3928,6 +5526,154 @@
           "donatedAt"
         ]
       },
+      "ReportEntryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "parameterName": {
+            "type": "string",
+            "example": "Emoglobina"
+          },
+          "unit": {
+            "type": "string",
+            "example": "g/dL"
+          },
+          "measuredValue": {
+            "type": "number",
+            "example": 14.5
+          },
+          "refMin": {
+            "type": "number",
+            "example": 12
+          },
+          "refMax": {
+            "type": "number",
+            "example": 17.5
+          }
+        },
+        "required": [
+          "id",
+          "parameterName",
+          "unit",
+          "measuredValue",
+          "refMin",
+          "refMax"
+        ]
+      },
+      "MedicalReportInDonationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "donationId": {
+            "type": "string",
+            "example": "clxyz456"
+          },
+          "doctorId": {
+            "type": "string",
+            "example": "clxyz789"
+          },
+          "compiledAt": {
+            "type": "string",
+            "example": "2024-06-15T10:00:00.000Z"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-06-15T10:00:00.000Z"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportEntryResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "donationId",
+          "doctorId",
+          "compiledAt",
+          "createdAt",
+          "entries"
+        ]
+      },
+      "DonationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "bookingId": {
+            "type": "string",
+            "example": "clxyz456"
+          },
+          "donorId": {
+            "type": "string",
+            "example": "clxyz789"
+          },
+          "centerId": {
+            "type": "string",
+            "example": "clxyz012"
+          },
+          "donationTypeId": {
+            "type": "string",
+            "example": "clxyz345"
+          },
+          "donatedAt": {
+            "type": "string",
+            "example": "2024-06-15T09:00:00.000Z"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-06-15T09:00:00.000Z"
+          },
+          "center": {
+            "$ref": "#/components/schemas/CenterResponseDto"
+          },
+          "donationType": {
+            "$ref": "#/components/schemas/DonationTypeResponseDto"
+          },
+          "medicalReport": {
+            "$ref": "#/components/schemas/MedicalReportInDonationResponseDto"
+          }
+        },
+        "required": [
+          "id",
+          "bookingId",
+          "donorId",
+          "centerId",
+          "donationTypeId",
+          "donatedAt",
+          "createdAt"
+        ]
+      },
+      "PaginatedDonationResponseDto": {
+        "type": "object",
+        "properties": {
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "example": "clxyz123",
+            "description": "Cursore per la pagina successiva. null se non esistono altri elementi."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DonationResponseDto"
+            }
+          }
+        },
+        "required": [
+          "nextCursor",
+          "items"
+        ]
+      },
       "CreateGdprRequestDto": {
         "type": "object",
         "properties": {
@@ -3948,6 +5694,87 @@
           "type"
         ]
       },
+      "GdprRequestResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "donorId": {
+            "type": "string",
+            "example": "clxyz456",
+            "description": "ID profilo donatore."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "EXPORT",
+              "DELETION",
+              "RECTIFICATION"
+            ],
+            "example": "EXPORT"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "COMPLETED",
+              "CANCELLED"
+            ],
+            "example": "PENDING"
+          },
+          "notes": {
+            "type": "object",
+            "nullable": true,
+            "example": "Richiesta di rettifica indirizzo."
+          },
+          "requestedAt": {
+            "type": "string",
+            "example": "2024-06-01T10:00:00.000Z"
+          },
+          "handledAt": {
+            "type": "object",
+            "nullable": true,
+            "example": null
+          },
+          "exportData": {
+            "type": "object",
+            "nullable": true,
+            "description": "Presente solo per richieste EXPORT già gestite."
+          }
+        },
+        "required": [
+          "id",
+          "donorId",
+          "type",
+          "status",
+          "notes",
+          "requestedAt",
+          "handledAt"
+        ]
+      },
+      "PaginatedGdprRequestResponseDto": {
+        "type": "object",
+        "properties": {
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "example": "clxyz123",
+            "description": "Cursore per la pagina successiva. null se non esistono altri elementi."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GdprRequestResponseDto"
+            }
+          }
+        },
+        "required": [
+          "nextCursor",
+          "items"
+        ]
+      },
       "HandleGdprRequestDto": {
         "type": "object",
         "properties": {
@@ -3956,6 +5783,60 @@
             "maxLength": 1000
           }
         }
+      },
+      "DonorSearchResultResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "userId": {
+            "type": "string",
+            "example": "clxyz456"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Mario"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Rossi"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "example": "1985-01-10"
+          },
+          "bloodGroup": {
+            "type": "string",
+            "enum": [
+              "A_POSITIVE",
+              "A_NEGATIVE",
+              "B_POSITIVE",
+              "B_NEGATIVE",
+              "AB_POSITIVE",
+              "AB_NEGATIVE",
+              "O_POSITIVE",
+              "O_NEGATIVE",
+              "UNKNOWN"
+            ],
+            "example": "A_POSITIVE"
+          },
+          "completedDonationsCount": {
+            "type": "number",
+            "example": 5,
+            "description": "Numero di donazioni completate."
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "firstName",
+          "lastName",
+          "dateOfBirth",
+          "bloodGroup",
+          "completedDonationsCount"
+        ]
       },
       "CreateMedicalReportDto": {
         "type": "object",
@@ -4006,6 +5887,66 @@
           "entries"
         ]
       },
+      "MedicalReportResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "donationId": {
+            "type": "string",
+            "example": "clxyz456"
+          },
+          "doctorId": {
+            "type": "string",
+            "example": "clxyz789"
+          },
+          "compiledAt": {
+            "type": "string",
+            "example": "2024-06-15T10:00:00.000Z"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-06-15T10:00:00.000Z"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportEntryResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "donationId",
+          "doctorId",
+          "compiledAt",
+          "createdAt",
+          "entries"
+        ]
+      },
+      "PaginatedMedicalReportResponseDto": {
+        "type": "object",
+        "properties": {
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "example": "clxyz123",
+            "description": "Cursore per la pagina successiva. null se non esistono altri elementi."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MedicalReportResponseDto"
+            }
+          }
+        },
+        "required": [
+          "nextCursor",
+          "items"
+        ]
+      },
       "CreateClinicalNoteDto": {
         "type": "object",
         "properties": {
@@ -4023,6 +5964,38 @@
         "required": [
           "donorId",
           "content"
+        ]
+      },
+      "ClinicalNoteResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "donorId": {
+            "type": "string",
+            "example": "clxyz456"
+          },
+          "doctorId": {
+            "type": "string",
+            "example": "clxyz789"
+          },
+          "content": {
+            "type": "string",
+            "example": "Il paziente mostra valori di emoglobina nella norma."
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-06-15T10:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "donorId",
+          "doctorId",
+          "content",
+          "createdAt"
         ]
       },
       "CreateExclusionDto": {
@@ -4063,6 +6036,65 @@
           "startDate"
         ]
       },
+      "ExclusionResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "donorId": {
+            "type": "string",
+            "example": "clxyz456"
+          },
+          "setByDoctorId": {
+            "type": "string",
+            "example": "clxyz789"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "TEMPORARY",
+              "PERMANENT"
+            ],
+            "example": "TEMPORARY"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Recente intervento chirurgico."
+          },
+          "startDate": {
+            "type": "string",
+            "example": "2024-06-15",
+            "description": "Formato YYYY-MM-DD."
+          },
+          "endDate": {
+            "type": "object",
+            "nullable": true,
+            "example": "2024-09-15",
+            "description": "null se permanente."
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-06-15T10:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "donorId",
+          "setByDoctorId",
+          "type",
+          "reason",
+          "startDate",
+          "endDate",
+          "isActive",
+          "createdAt"
+        ]
+      },
       "CloseExclusionDto": {
         "type": "object",
         "properties": {
@@ -4074,6 +6106,270 @@
         },
         "required": [
           "endDate"
+        ]
+      },
+      "DonationStatsByCenterDto": {
+        "type": "object",
+        "properties": {
+          "centerId": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "count": {
+            "type": "number",
+            "example": 42
+          }
+        },
+        "required": [
+          "centerId",
+          "count"
+        ]
+      },
+      "DonationStatsByTypeDto": {
+        "type": "object",
+        "properties": {
+          "typeId": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "count": {
+            "type": "number",
+            "example": 42
+          }
+        },
+        "required": [
+          "typeId",
+          "count"
+        ]
+      },
+      "DonationStatsResponseDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "example": 150
+          },
+          "byCenter": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DonationStatsByCenterDto"
+            }
+          },
+          "byDonationType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DonationStatsByTypeDto"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "byCenter",
+          "byDonationType"
+        ]
+      },
+      "DonorStatsByBloodGroupDto": {
+        "type": "object",
+        "properties": {
+          "group": {
+            "type": "string",
+            "enum": [
+              "A_POSITIVE",
+              "A_NEGATIVE",
+              "B_POSITIVE",
+              "B_NEGATIVE",
+              "AB_POSITIVE",
+              "AB_NEGATIVE",
+              "O_POSITIVE",
+              "O_NEGATIVE",
+              "UNKNOWN"
+            ],
+            "example": "A_POSITIVE"
+          },
+          "count": {
+            "type": "number",
+            "example": 30
+          }
+        },
+        "required": [
+          "group",
+          "count"
+        ]
+      },
+      "DonorStatsByBiologicalSexDto": {
+        "type": "object",
+        "properties": {
+          "sex": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE"
+            ],
+            "example": "MALE"
+          },
+          "count": {
+            "type": "number",
+            "example": 80
+          }
+        },
+        "required": [
+          "sex",
+          "count"
+        ]
+      },
+      "DonorStatsNewPerMonthDto": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "example": "2024-06",
+            "description": "Formato YYYY-MM."
+          },
+          "count": {
+            "type": "number",
+            "example": 12
+          }
+        },
+        "required": [
+          "month",
+          "count"
+        ]
+      },
+      "DonorStatsResponseDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "example": 200
+          },
+          "byBloodGroup": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DonorStatsByBloodGroupDto"
+            }
+          },
+          "byBiologicalSex": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DonorStatsByBiologicalSexDto"
+            }
+          },
+          "newPerMonth": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DonorStatsNewPerMonthDto"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "byBloodGroup",
+          "byBiologicalSex",
+          "newPerMonth"
+        ]
+      },
+      "SlotOccupancyStatResponseDto": {
+        "type": "object",
+        "properties": {
+          "center": {
+            "$ref": "#/components/schemas/CenterResponseDto"
+          },
+          "slotCount": {
+            "type": "number",
+            "example": 10
+          },
+          "totalCapacity": {
+            "type": "number",
+            "example": 100
+          },
+          "totalBooked": {
+            "type": "number",
+            "example": 75
+          },
+          "occupancyRate": {
+            "type": "number",
+            "example": 0.75,
+            "description": "Tasso di occupazione (0–1)."
+          }
+        },
+        "required": [
+          "center",
+          "slotCount",
+          "totalCapacity",
+          "totalBooked",
+          "occupancyRate"
+        ]
+      },
+      "BookingStatsByStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "IN_AWAITING_REPORT",
+              "COMPLETED",
+              "CANCELLED"
+            ],
+            "example": "CONFIRMED"
+          },
+          "count": {
+            "type": "number",
+            "example": 50
+          }
+        },
+        "required": [
+          "status",
+          "count"
+        ]
+      },
+      "BookingStatsByCancellationReasonDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "DONOR_CANCELLED",
+              "OPERATOR_CANCELLED",
+              "NO_SHOW",
+              "FAILED_PRE_CHECK"
+            ],
+            "example": "DONOR_CANCELLED"
+          },
+          "count": {
+            "type": "number",
+            "example": 10
+          }
+        },
+        "required": [
+          "reason",
+          "count"
+        ]
+      },
+      "BookingStatsResponseDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "example": 300
+          },
+          "byStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookingStatsByStatusDto"
+            }
+          },
+          "cancellationsByReason": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookingStatsByCancellationReasonDto"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "byStatus",
+          "cancellationsByReason"
         ]
       },
       "CreateDonorProfileDto": {
@@ -4191,6 +6487,27 @@
         },
         "required": [
           "consentGiven"
+        ]
+      },
+      "PaginatedDonorProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "example": "clxyz123",
+            "description": "Cursore per la pagina successiva. null se non esistono altri elementi."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DonorProfileResponseDto"
+            }
+          }
+        },
+        "required": [
+          "nextCursor",
+          "items"
         ]
       },
       "CreateSlotDto": {
