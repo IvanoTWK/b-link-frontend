@@ -2,8 +2,8 @@ import type { Role } from '@/lib/types'
 
 export const ROLE_REDIRECT: Record<Role, string> = {
   GUEST: '/',
-  DONOR: '/donatori',
-  OPERATOR: '/operatori',
-  DOCTOR: '/dottori',
+  DONOR: '/donors',
+  OPERATOR: '/operators',
+  DOCTOR: '/doctors',
   ADMIN: '/admin',
 }

@@ -1,9 +1,13 @@
-import { LoginForm } from '@/components/auth/LoginForm'
-import { GalleryVerticalEnd } from "lucide-react"
-import Link from 'next/link'
+import { GalleryVerticalEnd } from 'lucide-react'
+import { VerifyEmailPending } from '@/components/auth/VerifyEmailPending'
 
+export default async function VerifyEmailPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ email?: string }>
+}) {
+  const { email } = await searchParams
 
-export default function LoginPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
@@ -17,21 +21,7 @@ export default function LoginPage() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2 text-center">
-                <h1 className="text-2xl font-bold">Accedi</h1>
-                <p className="text-sm text-muted-foreground">
-                  Non hai un account?{' '}
-                  <Link
-                    href="/auth/register"
-                    className="text-primary underline underline-offset-4 hover:opacity-80"
-                  >
-                    Registrati
-                  </Link>
-                </p>
-              </div>
-              <LoginForm />
-            </div>
+            <VerifyEmailPending email={email ?? ''} />
           </div>
         </div>
       </div>

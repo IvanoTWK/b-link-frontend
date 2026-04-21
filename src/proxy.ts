@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const REFRESH_COOKIE_NAME = 'refreshToken'
-const PROTECTED_PREFIX = ['/donatori', '/operatori', '/dottori', '/admin', '/profilo']
+const PROTECTED_PREFIX = ['/donors', '/operators', '/doctors', '/admin', '/profile']
 const AUTH_PREFIX = ['/auth']
+const AUTH_PUBLIC_PREFIX = ['/auth/verify-email/confirm', '/auth/verify-email']
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -16,13 +17,17 @@ export function proxy(request: NextRequest) {
     pathname.startsWith(prefix)
   )
 
+  const isAuthPublic = AUTH_PUBLIC_PREFIX.some((prefix) =>
+    pathname.startsWith(prefix)
+  )
+
   if (isProtected && !hasRefreshToken) {
     const loginUrl = new URL('/auth/login', request.url)
     loginUrl.searchParams.set('redirect', request.url)
     return NextResponse.redirect(loginUrl)
   }
 
-  if (isAuthRoute && hasRefreshToken) {
+  if (isAuthRoute && !isAuthPublic && hasRefreshToken) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 

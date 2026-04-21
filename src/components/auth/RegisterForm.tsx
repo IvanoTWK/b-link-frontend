@@ -45,7 +45,7 @@ export function RegisterForm() {
       })
 
       router.push(
-        `/auth/verifica-email?email=${encodeURIComponent(values.email)}`,
+        `/auth/verify-email?email=${encodeURIComponent(values.email)}`,
       )
     } catch (err: unknown) {
       const axiosError = err as {
