@@ -57,12 +57,12 @@ export function LoginForm() {
       }
 
       if (data.action === '2FA_REQUIRED') {
-        router.push(`/auth/2fa/verifica?token=${encodeURIComponent(data.preAuthToken)}`)
+        router.push(`/auth/2fa/verify?token=${encodeURIComponent(data.preAuthToken)}`)
         return
       }
 
       if (data.action === 'SETUP_2FA_REQUIRED') {
-        router.push(`/auth/2fa/configurazione?token=${encodeURIComponent(data.preAuthToken)}`)
+        router.push(`/auth/2fa/setup?token=${encodeURIComponent(data.preAuthToken)}`)
         return
       }
     } catch (err: unknown) {
