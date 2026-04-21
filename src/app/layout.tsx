@@ -3,8 +3,7 @@ import { Inter, Lora, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils/utils";
 import { Providers } from "./providers";
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
+import { Toaster } from "@/components/ui/sonner";
 
 const fontSans = Inter({
   subsets: ["latin"],
@@ -39,6 +38,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
+        <Toaster position="top-right" />
       </body>
     </html>
   );
