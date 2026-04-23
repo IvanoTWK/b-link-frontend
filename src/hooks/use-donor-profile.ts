@@ -19,11 +19,12 @@ async function fetchDonorProfile(): Promise<DonorProfile | null> {
   }
 }
 
-export function useDonorProfile() {
+export function useDonorProfile(options?: { enabled?: boolean }) {
   const { data, isLoading, isError, refetch } = useQuery<DonorProfile | null>({
     queryKey: ['donor', 'profile'],
     queryFn: fetchDonorProfile,
-    staleTime: 5 * 60 * 1000
+    staleTime: 5 * 60 * 1000,
+    enabled: options?.enabled ?? true,
   })
 
   return {
