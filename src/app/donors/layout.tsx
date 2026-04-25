@@ -58,7 +58,7 @@ export default function DonorsLayout({ children }: { children: ReactNode }) {
       <AppSidebar />
       <SidebarInset>
         <DonorsHeader />
-        <main className="flex-1 p-4">
+        <main className="flex-1 min-h-0 overflow-auto p-6">
           {children}
         </main>
       </SidebarInset>

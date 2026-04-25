@@ -40,7 +40,7 @@
   --font-sans: 'Inter', 'Lora', sans-serif;
   --font-serif: 'Lora', serif;
   --font-mono: 'Fira Code', monospace;
-  --radius: 0.75rem;
+  --radius: 0;
   --shadow-x: 0px;
   --shadow-y: 3px;
   --shadow-blur: 4px;
@@ -95,7 +95,7 @@
   --font-sans: 'Inter', 'Lora', sans-serif;
   --font-serif: 'Lora', serif;
   --font-mono: 'Fira Code', monospace;
-  --radius: 0.75rem;
+  --radius: 0;
   --shadow-x: 0px;
   --shadow-y: 3px;
   --shadow-blur: 4px;
