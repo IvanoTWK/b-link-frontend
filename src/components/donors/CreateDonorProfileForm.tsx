@@ -63,6 +63,7 @@ export function CreateDonorProfileForm({ onSuccess }: CreateDonorProfileFormProp
     register,
     handleSubmit,
     control,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<CreateDonorProfileFormValues>({
     resolver: zodResolver(createDonorProfileSchema),
@@ -90,9 +91,32 @@ export function CreateDonorProfileForm({ onSuccess }: CreateDonorProfileFormProp
       onSuccess()
     } catch (err: unknown) {
       const axiosError = err as {
-        response?: { data?: { message?: string; error?: string } }
+        response?: {
+          data?: {
+            message?: string
+            error?: string
+            errors?: Array<{ path: (string | number)[]; message: string }>
+          }
+        }
       }
       const responseData = axiosError?.response?.data
+
+      // Map backend Zod field errors back to form fields for inline display
+      if (Array.isArray(responseData?.errors) && responseData.errors.length > 0) {
+        const fieldErrors = responseData.errors.filter((e) => e.path?.length > 0)
+        const globalErrors = responseData.errors.filter((e) => !e.path?.length)
+
+        fieldErrors.forEach((e) => {
+          const field = e.path[0] as keyof CreateDonorProfileFormValues
+          setError(field, { type: 'server', message: e.message })
+        })
+
+        const firstMessage =
+          fieldErrors[0]?.message ?? globalErrors[0]?.message ?? 'Dati non validi.'
+        toast.error(firstMessage)
+        return
+      }
+
       const message =
         responseData?.message ??
         responseData?.error ??
