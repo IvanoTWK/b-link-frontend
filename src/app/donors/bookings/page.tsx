@@ -9,6 +9,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 
 // ── Tipi ──────────────────────────────────────────────────────────────────────
 
@@ -57,49 +65,58 @@ export default function BookingsPage() {
   })
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col min-h-[calc(100dvh-6.5rem)]">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Le tue prenotazioni</h1>
+          <h1 className="text-xl font-semibold">Le tue prenotazioni</h1>
           <p className="text-sm text-muted-foreground">Storico e prenotazioni attive.</p>
         </div>
-        <Button asChild size="sm">
-          <Link href="/donors/bookings/new">
-            <Plus className="h-4 w-4 mr-1" />
-            Nuova prenotazione
-          </Link>
-        </Button>
+        {!isLoading && !isError && data && data.items.length > 0 && (
+          <Button asChild size="sm">
+            <Link href="/donors/bookings/new">
+              Nuova prenotazione
+            </Link>
+          </Button>
+        )}
       </div>
 
       {isLoading && (
-        <div className="space-y-3">
+        <div className="space-y-3 mt-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full rounded-xl" />
+            <Skeleton key={i} className="h-20 w-full" />
           ))}
         </div>
       )}
 
       {isError && (
-        <p className="text-sm text-destructive">Errore nel caricamento delle prenotazioni.</p>
+        <p className="text-sm text-destructive mt-4">Errore nel caricamento delle prenotazioni.</p>
       )}
 
       {!isLoading && !isError && data?.items.length === 0 && (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
-            <CalendarDays className="h-10 w-10 text-muted-foreground" />
-            <div>
-              <p className="font-medium">Nessuna prenotazione</p>
-              <p className="text-sm text-muted-foreground">Prenota la tua prima donazione.</p>
-            </div>
-            <Button asChild size="sm">
-              <Link href="/donors/bookings/new">Prenota ora</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="flex flex-1 items-center justify-center">
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia className="border p-2 bg-muted rounded-sm">
+                <CalendarDays />
+              </EmptyMedia>
+              <EmptyTitle className="text-md">Non hai nessuna prenotazione</EmptyTitle>
+              <EmptyDescription className="text-sm text-muted-foreground">
+                Nessuna prenotazione in programma. Inizia prenotando la tua prima donazione.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button asChild size="sm" className="px-4">
+                <Link href="/donors/bookings/new">
+                  Nuova prenotazione
+                </Link>
+              </Button>
+            </EmptyContent>
+          </Empty>
+        </div>
       )}
 
       {!isLoading && !isError && data && data.items.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-3 mt-4">
           {data.items.map((booking) => (
             <Link key={booking.id} href={`/donors/bookings/${booking.id}`}>
               <Card className="hover:bg-accent/50 transition-colors cursor-pointer">
@@ -110,14 +127,14 @@ export default function BookingsPage() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-sm truncate">
+                      <span className="font-medium truncate">
                         {booking.donationType?.name ?? '—'}
                       </span>
                       <Badge variant={STATUS_VARIANT[booking.status]}>
                         {STATUS_LABEL[booking.status]}
                       </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       {booking.slot
                         ? `${formatDate(booking.slot.date)} · ${booking.slot.startTime} · ${booking.slot.center?.name ?? '—'}`
                         : '—'}
