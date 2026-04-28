@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils/utils";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const fontSans = Inter({
   subsets: ["latin"],
@@ -37,7 +38,11 @@ export default function RootLayout({
       className={cn("h-full", "antialiased", fontSans.variable, fontMono.variable, "font-sans", fontSerif.variable)}
     >
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <Providers>
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+        </Providers>
         <Toaster position="top-right" />
       </body>
     </html>

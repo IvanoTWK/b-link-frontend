@@ -48,3 +48,7 @@ api.generated.ts
 # claude
 .claude/
 CLAUDE.md
+
+
+# Setting
+.vscode/

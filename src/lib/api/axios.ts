@@ -82,6 +82,18 @@ apiClient.interceptors.response.use(
     try {
       const { data } = await refreshClient.post<{ accessToken: string }>('auth/refresh')
       useAuthStore.getState().setAccessToken(data.accessToken)
+
+      // Ripopola user nello store dopo il refresh per evitare che user rimanga
+      // null e causi redirect indesiderati nei layout protetti (es. donor area).
+      // Si usa refreshClient con il nuovo token nell'header per non ritriggerare
+      // l'interceptor. Se /auth/me fallisce si procede comunque: il token è
+      // valido e il layout gestirà il caso user: null.
+      try {
+        const { data: me } = await refreshClient.get<import('../types').AuthMeResponse>('auth/me', {
+          headers: { Authorization: `Bearer ${data.accessToken}` },
+        })
+        useAuthStore.getState().setUser(me)
+      } catch { }
       processQueue(null, data.accessToken)
       originalRequest.headers.Authorization = `Bearer ${data.accessToken}`
       return apiClient.request(originalRequest)
