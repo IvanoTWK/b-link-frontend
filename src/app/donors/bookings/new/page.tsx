@@ -9,15 +9,16 @@ import dynamic from 'next/dynamic'
 
 import { apiClient } from '@/lib/api/axios'
 import type { Center, DonationType, Slot } from '@/lib/types'
-import { Button } from '@/components/ui/button'
+import { BentoCard, BentoGrid } from '@/components/ui/bento-grid'
 import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
 
 // Leaflet richiede window → import dinamico senza SSR
 const CenterMap = dynamic(
-  () => import('@/components/donors/bookings/CenterMap'),
+  () => import('@/components/donors/bookings/center-map'),
   { ssr: false, loading: () => <Skeleton className="h-full w-full" /> },
 )
 
@@ -100,27 +101,27 @@ function StepDonationType({
   })
 
   const TYPE_CONFIG: Record<string, {
-    icon: React.ReactNode
+    iconComponent: React.ElementType
     description: string
     gradient: string
   }> = {
     SI: {
-      icon: <Droplets className="h-48 w-48 text-primary" />,
+      iconComponent: Droplets,
       description: 'La donazione più diffusa. Il sangue intero viene separato in componenti — globuli rossi, plasma e piastrine — per aiutare più pazienti con una sola donazione.',
       gradient: 'from-primary via-primary/70 to-primary/40',
     },
     PL: {
-      icon: <FlaskConical className="h-48 w-48 text-primary" />,
+      iconComponent: FlaskConical,
       description: 'Il plasma viene raccolto tramite aferesi e restituito il resto del sangue. Usato per farmaci salvavita, terapie d\'emergenza e pazienti con gravi ustioni.',
       gradient: 'from-primary/90 via-primary/60 to-primary/30',
     },
     PT: {
-      icon: <Microscope className="h-48 w-48 text-primary" />,
+      iconComponent: Microscope,
       description: 'Le piastrine sono fondamentali per i pazienti oncologici in chemioterapia e per chi soffre di disturbi della coagulazione. La donazione dura circa 90 minuti.',
       gradient: 'from-primary/80 via-primary/50 to-primary/20',
     },
     BC: {
-      icon: <Layers className="h-48 w-48 text-primary" />,
+      iconComponent: Layers,
       description: 'In un\'unica seduta vengono raccolti sia plasma che piastrine tramite aferesi avanzata. Massimizza l\'impatto della donazione riducendo il numero di accessi al centro.',
       gradient: 'from-primary/70 via-primary/45 to-primary/15',
     },
@@ -130,9 +131,11 @@ function StepDonationType({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-52 w-full rounded-xl" />)}
-      </div>
+      <BentoGrid className="grid-cols-1 md:grid-cols-2 auto-rows-[20rem]">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="col-span-1 rounded-xl h-full" />
+        ))}
+      </BentoGrid>
     )
   }
 
@@ -145,48 +148,60 @@ function StepDonationType({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+      <BentoGrid className="grid-cols-1 md:grid-cols-2 auto-rows-[20rem] mt-2">
         {data?.slice().reverse().map((type) => {
           const config = TYPE_CONFIG[type.code] ?? fallback
+          const IconComp = config.iconComponent
           const isSelected = selected?.id === type.id
           return (
-            <button
+            <div
               key={type.id}
               onClick={() => onSelect(type)}
-              className="text-left focus:outline-none"
+              className={`group relative col-span-1 flex flex-col justify-end overflow-hidden rounded-xl cursor-pointer transform-gpu bg-gradient-to-br ${config.gradient}${isSelected ? ' ring-2 ring-white/80' : ''}`}
             >
-              <Card className={`relative overflow-hidden min-h-[200px] border-0 bg-gradient-to-br ${config.gradient} transition-all duration-200 cursor-pointer
-                ${isSelected ? 'ring-2 ring-primary' : 'hover:shadow-lg hover:scale-[1.01]'}
-              `}>
-                {/* Icona decorativa — fuoriesce a destra, clippata da overflow-hidden */}
-                <div className="absolute -right-16 top-1/2 -translate-y-1/2 opacity-50 pointer-events-none z-10">
-                  {config.icon}
+              {/* Icona decorativa grande in background */}
+              <div className="absolute -right-8 -top-6 opacity-20 pointer-events-none">
+                <IconComp className="h-48 w-48 text-white" />
+              </div>
+
+              {/* Check selezione */}
+              {isSelected && (
+                <div className="absolute top-4 right-4 z-30">
+                  <Check className="h-7 w-7 text-white drop-shadow" />
+                </div>
+              )}
+
+              {/* Strip inferiore — stesso pattern di BentoCard */}
+              <div className="p-4">
+                <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 transition-all duration-300 lg:group-hover:-translate-y-10">
+                  <IconComp className="h-12 w-12 origin-left transform-gpu text-white transition-all duration-300 ease-in-out group-hover:scale-75" />
+                  <h3 className="text-xl font-semibold text-white">{type.name}</h3>
+                  <p className="max-w-lg text-white/70 text-sm leading-relaxed line-clamp-2">
+                    {config.description}
+                  </p>
                 </div>
 
-                {/* Check selezione */}
-                {isSelected && (
-                  <div className="absolute top-4 right-4 z-30">
-                    <Check className="h-8 w-8 text-white" />
-                  </div>
-                )}
+                {/* CTA mobile */}
+                <div className="pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:hidden">
+                  <span className="text-white/80 text-sm font-medium flex items-center gap-1 pt-1">
+                    Seleziona
+                  </span>
+                </div>
+              </div>
 
-                {/* Contenuto testuale */}
-                <CardContent className="relative z-20 p-6 flex flex-col gap-3 h-full">
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-white font-bold text-lg leading-tight">{type.name}</p>
-                    <p className="text-white text-xs">Ogni {type.minIntervalDays}gg · min. {type.minWeightKg}kg</p>
-                  </div>
-                  <p className="text-white text-sm leading-relaxed">{config.description}</p>
-                  <p className="text-white text-xs mt-auto">
-                    Max <span className="font-medium">{type.maxPerYearMale}</span>/anno (uomo) ·{' '}
-                    <span className="font-medium">{type.maxPerYearFemaleFertile}</span> (donna fertile)
-                  </p>
-                </CardContent>
-              </Card>
-            </button>
+              {/* CTA desktop — appare da sotto all'hover */}
+              <div className="pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:flex">
+                <span className="text-white text-sm font-semibold">
+                  Seleziona →
+                </span>
+              </div>
+
+              {/* Overlay hover */}
+              <div className="pointer-events-none absolute inset-0 transform-gpu transition-all duration-300 group-hover:bg-white/5" />
+            </div>
           )
         })}
-      </div>
+      </BentoGrid>
     </div>
   )
 }
@@ -503,15 +518,15 @@ function StepConfirm({
     PT: 'from-cyan-400 via-blue-500 to-indigo-700',
     BC: 'from-fuchsia-400 via-violet-600 to-purple-800',
   }
-  const TYPE_ICON: Record<string, React.ReactNode> = {
-    SI: <Droplets className="h-6 w-6 text-white" />,
-    PL: <FlaskConical className="h-6 w-6 text-white" />,
-    PT: <Microscope className="h-6 w-6 text-white" />,
-    BC: <Layers className="h-6 w-6 text-white" />,
+  const TYPE_ICON_COMPONENT: Record<string, React.ElementType> = {
+    SI: Droplets,
+    PL: FlaskConical,
+    PT: Microscope,
+    BC: Layers,
   }
 
   const gradient = TYPE_GRADIENT[donationType.code] ?? TYPE_GRADIENT['SI']
-  const icon = TYPE_ICON[donationType.code] ?? TYPE_ICON['SI']
+  const TypeIconComp = TYPE_ICON_COMPONENT[donationType.code] ?? Droplets
 
   const dateObj = new Date(slot.date)
   const dayNum = dateObj.toLocaleDateString('it-IT', { day: '2-digit' })
@@ -528,23 +543,27 @@ function StepConfirm({
   return (
     <div className="flex flex-col gap-4">
 
-      {/* Griglia principale: banner a sinistra, cards a destra */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Grid: banner tipo + sede + data — stessa struttura di booking-info-grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-        {/* Colonna sinistra — Banner tipo donazione */}
-        <div className={`bg-gradient-to-br ${gradient} rounded-xl p-6 flex flex-col justify-between`}>
-          <div className="bg-white/20 rounded-xl p-3 w-fit">{icon}</div>
+        {/* Banner tipo donazione */}
+        <div className={`bg-gradient-to-br ${gradient} rounded-xl p-6 flex flex-col justify-between min-h-[180px]`}>
+          <div className="bg-white/20 rounded-xl p-3 w-fit">
+            <TypeIconComp className="h-6 w-6 text-white" />
+          </div>
           <div className="flex flex-col gap-1 mt-6">
             <p className="text-white/70 text-xs font-medium uppercase tracking-wide">Tipo donazione</p>
             <p className="text-white text-2xl font-bold leading-tight">{donationType.name}</p>
-            <p className="text-white/70 text-sm mt-1">Ogni {donationType.minIntervalDays}gg · min. {donationType.minWeightKg} kg</p>
+            <p className="text-white/70 text-sm mt-1">
+              Ogni {donationType.minIntervalDays}gg · min. {donationType.minWeightKg} kg
+            </p>
           </div>
         </div>
 
-        {/* Colonna destra — Sede e Data/Ora */}
+        {/* Cards sede + data */}
         <div className="flex flex-col gap-4">
 
-          {/* Card sede */}
+          {/* Sede */}
           <Card className="flex-1 border-border">
             <CardContent className="p-5 flex items-start gap-4 h-full">
               <div className="bg-muted rounded-lg p-2.5 shrink-0">
@@ -558,7 +577,7 @@ function StepConfirm({
             </CardContent>
           </Card>
 
-          {/* Card data e ora */}
+          {/* Data e orario */}
           <Card className="flex-1 border-border">
             <CardContent className="p-5 flex items-start gap-4 h-full">
               <div className="bg-muted rounded-lg p-2.5 shrink-0">
@@ -567,7 +586,9 @@ function StepConfirm({
               <div className="flex flex-col gap-0.5">
                 <p className="text-xs text-muted-foreground font-medium">Data e orario</p>
                 <p className="text-sm font-semibold capitalize">{weekday} {dayNum} {monthName} {year}</p>
-                <p className="text-xs text-muted-foreground">{slot.startTime} – {slot.endTime}</p>
+                <p className="text-xs text-muted-foreground">
+                  {slot.startTime}{slot.endTime ? ` – ${slot.endTime}` : ''}
+                </p>
               </div>
             </CardContent>
           </Card>

@@ -6,7 +6,7 @@ import { useAuthStore } from "@/lib/store/auth.store"
 import { useDonorProfile } from "@/hooks/use-donor-profile"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/ui/app-sidebar"
-import { DonorsHeader } from "@/components/donors/donors-header"
+import { DonorsHeader } from "@/components/donors/layout/donors-header"
 import { Spinner } from "@/components/ui/spinner"
 
 export default function DonorsLayout({ children }: { children: ReactNode }) {

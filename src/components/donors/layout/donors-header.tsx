@@ -37,36 +37,32 @@ function translateSegment(segment: string): string {
 
 export function DonorsHeader() {
   const pathname = usePathname()
-
-  const allSegments = pathname.split("/").filter(Boolean)
-  // Escludi il segmento radice della sezione (es. "donors")
-  const segments = allSegments.slice(1)
-
-  const crumbs = segments.map((segment, index) => {
-    const href = "/" + allSegments.slice(0, index + 2).join("/")
-    const label = translateSegment(segment)
-    const isLast = index === segments.length - 1
-    return { href, label, isLast }
-  })
+  const segments = pathname.split("/").filter(Boolean)
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+    <header className="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border px-4">
       <SidebarTrigger className="-ml-1" />
-      <Separator orientation="vertical" className="mr-2 h-full" />
+      <Separator orientation="vertical" className="mr-2 h-4" />
       <Breadcrumb>
         <BreadcrumbList>
-          {crumbs.map((crumb) => (
-            <React.Fragment key={crumb.href}>
-              <BreadcrumbItem>
-                {crumb.isLast ? (
-                  <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
-                )}
-              </BreadcrumbItem>
-              {!crumb.isLast && <BreadcrumbSeparator />}
-            </React.Fragment>
-          ))}
+          {segments.map((segment, index) => {
+            const isLast = index === segments.length - 1
+            const label = translateSegment(segment)
+            const href = "/" + segments.slice(0, index + 1).join("/")
+
+            return (
+              <React.Fragment key={href}>
+                <BreadcrumbItem>
+                  {isLast ? (
+                    <BreadcrumbPage>{label}</BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink href={href}>{label}</BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+                {!isLast && <BreadcrumbSeparator />}
+              </React.Fragment>
+            )
+          })}
         </BreadcrumbList>
       </Breadcrumb>
     </header>

@@ -7,17 +7,13 @@ import {
 } from "@/components/ui/sidebar"
 
 export function DatePicker() {
-  const [date, setDate] = React.useState<Date | undefined>(
-    new Date()
-  )
   return (
     <SidebarGroup className="px-0">
       <SidebarGroupContent>
         <Calendar
           mode="single"
-          selected={date}
-          onSelect={setDate}
-          captionLayout="dropdown"
+          selected={new Date()}
+          disableNavigation
           className="bg-transparent [--cell-size:2.1rem]"
         />
       </SidebarGroupContent>

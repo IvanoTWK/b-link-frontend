@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { CreateDonorProfileForm } from '@/components/donors/CreateDonorProfileForm'
+import { CreateDonorProfileForm } from '@/components/donors/profile/create-donor-profile-form'
 
 export default function SetupPage() {
   const router = useRouter()
