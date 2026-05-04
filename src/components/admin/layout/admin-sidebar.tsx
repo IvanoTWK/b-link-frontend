@@ -3,7 +3,19 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { GalleryVerticalEnd, LayoutDashboard, LogOut, UserRound, Users } from "lucide-react"
+import {
+  GalleryVerticalEnd,
+  LayoutDashboard,
+  LogOut,
+  UserRound,
+  Users,
+  Building2,
+  Droplets,
+  FlaskConical,
+  ClipboardList,
+  ScrollText,
+  ShieldCheck,
+} from "lucide-react"
 
 import { useAuthStore } from "@/lib/store/auth.store"
 import { apiClient } from "@/lib/api/axios"
@@ -13,6 +25,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -21,10 +34,22 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 
-const NAV_ITEMS = [
+const NAV_MAIN = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/users", label: "Utenti", icon: Users, exact: false },
   { href: "/admin/profile", label: "Profilo", icon: UserRound, exact: false },
+]
+
+const NAV_GESTIONE = [
+  { href: "/admin/centers", label: "Centri", icon: Building2, exact: false },
+  { href: "/admin/donation-types", label: "Tipi donazione", icon: Droplets, exact: false },
+  { href: "/admin/exam-parameters", label: "Parametri lab", icon: FlaskConical, exact: false },
+  { href: "/admin/anamnesis", label: "Domande anamnesi", icon: ClipboardList, exact: false },
+]
+
+const NAV_SISTEMA = [
+  { href: "/admin/audit-logs", label: "Audit log", icon: ScrollText, exact: false },
+  { href: "/admin/gdpr", label: "GDPR", icon: ShieldCheck, exact: false },
 ]
 
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -42,6 +67,9 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       router.replace('/auth/login')
     }
   }
+
+  const isActive = (item: { href: string; exact: boolean }) =>
+    item.exact ? pathname === item.href : pathname.startsWith(item.href)
 
   return (
     <Sidebar {...props}>
@@ -63,29 +91,81 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
 
       {/* Content — navigazione */}
       <SidebarContent>
+        {/* Principale */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => {
-                const isActive = item.exact
-                  ? pathname === item.href
-                  : pathname.startsWith(item.href)
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      size="lg"
-                      asChild
-                      isActive={isActive}
-                      className="[&_svg]:size-5 font-semibold text-base tracking-tight"
-                    >
-                      <Link href={item.href}>
-                        <item.icon />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
+              {NAV_MAIN.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    size="lg"
+                    asChild
+                    isActive={isActive(item)}
+                    className="[&_svg]:size-5 font-semibold text-base tracking-tight"
+                  >
+                    <Link href={item.href}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator className="mx-0" />
+
+        {/* Gestione */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs text-muted-foreground px-4 py-1">
+            Gestione
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {NAV_GESTIONE.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    size="lg"
+                    asChild
+                    isActive={isActive(item)}
+                    className="[&_svg]:size-5 font-semibold text-base tracking-tight"
+                  >
+                    <Link href={item.href}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator className="mx-0" />
+
+        {/* Sistema */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs text-muted-foreground px-4 py-1">
+            Sistema
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {NAV_SISTEMA.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    size="lg"
+                    asChild
+                    isActive={isActive(item)}
+                    className="[&_svg]:size-5 font-semibold text-base tracking-tight"
+                  >
+                    <Link href={item.href}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

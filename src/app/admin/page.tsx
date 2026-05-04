@@ -4,10 +4,18 @@ import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { ArrowRight, LockKeyholeOpen, Users } from 'lucide-react'
+import {
+  ArrowRight,
+  LockKeyholeOpen,
+  Users,
+  Droplets,
+  HeartPulse,
+  CalendarCheck,
+  CalendarDays,
+} from 'lucide-react'
 
 import { apiClient } from '@/lib/api/axios'
-import type { AdminUser } from '@/lib/types'
+import type { AdminUser, DonationStats, DonorStats, BookingStats } from '@/lib/types'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -44,6 +52,21 @@ async function fetchRecentUsers(): Promise<PaginatedUsers> {
   return data
 }
 
+async function fetchDonationStats(): Promise<DonationStats> {
+  const { data } = await apiClient.get<DonationStats>('/stats/donations')
+  return data
+}
+
+async function fetchDonorStats(): Promise<DonorStats> {
+  const { data } = await apiClient.get<DonorStats>('/stats/donors')
+  return data
+}
+
+async function fetchBookingStats(): Promise<BookingStats> {
+  const { data } = await apiClient.get<BookingStats>('/stats/bookings')
+  return data
+}
+
 // ── Card contatore ────────────────────────────────────────────────────────────
 
 function StatCard({
@@ -54,7 +77,7 @@ function StatCard({
 }: {
   icon: React.ReactNode
   label: string
-  value: number
+  value: number | string
   isLoading: boolean
 }) {
   return (
@@ -89,9 +112,29 @@ export default function AdminDashboardPage() {
     queryFn: fetchRecentUsers,
   })
 
+  const { data: donationStats, isLoading: isLoadingDonations } = useQuery({
+    queryKey: ['admin', 'stats', 'donations'],
+    queryFn: fetchDonationStats,
+  })
+
+  const { data: donorStats, isLoading: isLoadingDonors } = useQuery({
+    queryKey: ['admin', 'stats', 'donors'],
+    queryFn: fetchDonorStats,
+  })
+
+  const { data: bookingStats, isLoading: isLoadingBookings } = useQuery({
+    queryKey: ['admin', 'stats', 'bookings'],
+    queryFn: fetchBookingStats,
+  })
+
   const totalUsers = allUsersData?.items.length ?? 0
   const lockedUsers = allUsersData?.items.filter((u) => u.lockedAt !== null).length ?? 0
   const recentUsers = recentData?.items ?? []
+
+  const completedBookings =
+    bookingStats?.byStatus.find((s) => s.status === 'COMPLETED')?.count ?? 0
+  const confirmedBookings =
+    bookingStats?.byStatus.find((s) => s.status === 'CONFIRMED')?.count ?? 0
 
   return (
     <div className="flex flex-col gap-6">
@@ -102,20 +145,54 @@ export default function AdminDashboardPage() {
         </p>
       </div>
 
-      {/* Card contatori */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
-        <StatCard
-          icon={<Users className="h-5 w-5 text-muted-foreground" />}
-          label="Utenti totali"
-          value={totalUsers}
-          isLoading={isLoadingAll}
-        />
-        <StatCard
-          icon={<LockKeyholeOpen className="h-5 w-5 text-muted-foreground" />}
-          label="Account bloccati"
-          value={lockedUsers}
-          isLoading={isLoadingAll}
-        />
+      {/* Card contatori utenti */}
+      <div>
+        <h2 className="text-base font-semibold mb-3">Utenti</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+          <StatCard
+            icon={<Users className="h-5 w-5 text-muted-foreground" />}
+            label="Utenti totali"
+            value={totalUsers}
+            isLoading={isLoadingAll}
+          />
+          <StatCard
+            icon={<LockKeyholeOpen className="h-5 w-5 text-muted-foreground" />}
+            label="Account bloccati"
+            value={lockedUsers}
+            isLoading={isLoadingAll}
+          />
+        </div>
+      </div>
+
+      {/* Card statistiche donazioni e donatori */}
+      <div>
+        <h2 className="text-base font-semibold mb-3">Attività</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            icon={<Droplets className="h-5 w-5 text-muted-foreground" />}
+            label="Donazioni totali"
+            value={donationStats?.total ?? 0}
+            isLoading={isLoadingDonations}
+          />
+          <StatCard
+            icon={<HeartPulse className="h-5 w-5 text-muted-foreground" />}
+            label="Donatori registrati"
+            value={donorStats?.total ?? 0}
+            isLoading={isLoadingDonors}
+          />
+          <StatCard
+            icon={<CalendarCheck className="h-5 w-5 text-muted-foreground" />}
+            label="Prenotazioni confermate"
+            value={confirmedBookings}
+            isLoading={isLoadingBookings}
+          />
+          <StatCard
+            icon={<CalendarDays className="h-5 w-5 text-muted-foreground" />}
+            label="Prenotazioni completate"
+            value={completedBookings}
+            isLoading={isLoadingBookings}
+          />
+        </div>
       </div>
 
       {/* Ultimi utenti registrati */}
