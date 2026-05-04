@@ -123,6 +123,11 @@ export interface DonorBasicProfile {
   email: string
 }
 
+// ─── Admin types ─────────────────────────────────────────────────────────────
+export type AdminUser = components['schemas']['UserResponseDto']
+export type PaginatedUsers = components['schemas']['PaginatedUserResponseDto']
+export type StaffProfileAdmin = components['schemas']['StaffProfileAdminResponseDto']
+
 // ─── Stats ───────────────────────────────────────────────────────────────────
 export type DonationStats = components['schemas']['DonationStatsResponseDto']
 export type DonorStats = components['schemas']['DonorStatsResponseDto']
