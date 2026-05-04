@@ -79,7 +79,15 @@ export type StaffProfile = components['schemas']['StaffProfileResponseDto']
 export type Center = components['schemas']['CenterResponseDto']
 export type DonationType = components['schemas']['DonationTypeResponseDto']
 export type Slot = components['schemas']['SlotResponseDto']
-export type Booking = components['schemas']['BookingResponseDto']
+export type Booking = components['schemas']['BookingResponseDto'] & {
+  donor?: {
+    donorProfile?: {
+      firstName: string | null
+      lastName: string | null
+      phone: string | null
+    } | null
+  } | null
+}
 export type Donation = components['schemas']['DonationResponseDto']
 export type AnamnesisQuestion = components['schemas']['AnamnesisQuestionResponseDto']
 export type AnamnesisAnswer = components['schemas']['AnamnesisAnswerResponseDto']
@@ -90,6 +98,30 @@ export type ClinicalNote = components['schemas']['ClinicalNoteResponseDto']
 export type Exclusion = components['schemas']['ExclusionResponseDto']
 export type User = components['schemas']['UserResponseDto']
 export type GdprRequest = components['schemas']['GdprRequestResponseDto']
+
+// ─── Staff own profile (non generato — endpoint /staff/profile aggiunto manualmente) ──
+export interface StaffOwnProfile {
+  id: string
+  name: string
+  email: string
+  role: string
+  center: {
+    id: string
+    name: string
+    city: string
+    address: string
+  } | null
+}
+
+// ─── DonorBasicProfile (endpoint /donors/:id/basic-profile) ──────────────────
+// Non presente nel generato: aggiunto manualmente per l'area OPERATOR.
+export interface DonorBasicProfile {
+  id: string
+  firstName: string
+  lastName: string
+  phone: string
+  email: string
+}
 
 // ─── Stats ───────────────────────────────────────────────────────────────────
 export type DonationStats = components['schemas']['DonationStatsResponseDto']
