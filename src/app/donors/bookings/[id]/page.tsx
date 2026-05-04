@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -86,6 +87,7 @@ export default function BookingDetailPage() {
 
   const canCancel = booking.status === 'CONFIRMED'
   const hasAnamnesis = !!booking.anamnesisForm
+  const canViewAnamnesis = hasAnamnesis && booking.status !== 'CANCELLED'
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -133,6 +135,14 @@ export default function BookingDetailPage() {
       {/* Azioni */}
       {canCancel && (
         <BookingActions bookingId={id} hasAnamnesis={hasAnamnesis} />
+      )}
+      {!canCancel && canViewAnamnesis && (
+        <Button asChild size="lg" variant="outline" className="w-fit">
+          <Link href={`/donors/bookings/${id}/anamnesis`}>
+            <ClipboardList className="h-4 w-4 mr-2" />
+            Visualizza questionario
+          </Link>
+        </Button>
       )}
 
     </div>

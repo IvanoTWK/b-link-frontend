@@ -14,13 +14,10 @@ import {
 } from "@/components/ui/breadcrumb"
 
 const SEGMENT_LABELS: Record<string, string> = {
-  donors: "Donors",
-  profile: "Profilo",
-  setup: "Configurazione",
+  operators: "Operators",
   bookings: "Prenotazioni",
-  new: "Nuova",
-  anamnesis: "Anamnesi",
-  donations: "Donazioni",
+  slots: "Slot",
+  donors: "Donatori",
 }
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -35,7 +32,7 @@ function translateSegment(segment: string): string {
   return SEGMENT_LABELS[segment] ?? segment
 }
 
-export function DonorsHeader() {
+export function OperatorHeader() {
   const pathname = usePathname()
   const segments = pathname.split("/").filter(Boolean)
   const visibleSegments = segments.slice(1)

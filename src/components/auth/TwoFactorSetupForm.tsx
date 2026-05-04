@@ -16,7 +16,7 @@ import type { AuthMeResponse } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Field, FieldLabel, FieldError, FieldGroup } from '@/components/ui/field'
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
 
 interface Props {
   token: string
@@ -161,11 +161,11 @@ export function TwoFactorSetupForm({ token }: Props) {
       )}
 
       {!isLoading && otpauthUrl && (
-        <div className="flex flex-col items-center gap-4">
-          <QRCodeSVG value={otpauthUrl} size={200} />
+        <div className="flex flex-col items-center gap-3 py-2">
+          <QRCodeSVG value={otpauthUrl} size={120} />
           {secret && (
-            <p className="text-center text-xs text-muted-foreground">
-              In alternativa inserisci manualmente il codice:{' '}
+            <p className="text-xs text-muted-foreground text-center">
+              Codice manuale:{' '}
               <code className="rounded bg-muted px-1 py-0.5 font-mono">{secret}</code>
             </p>
           )}
@@ -176,22 +176,25 @@ export function TwoFactorSetupForm({ token }: Props) {
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor="code">Codice di verifica</FieldLabel>
-            <Controller
-              name="code"
-              control={control}
-              render={({ field }) => (
-                <InputOTP maxLength={6} {...field} id="code" autoComplete="one-time-code">
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
-                  </InputOTPGroup>
-                </InputOTP>
-              )}
-            />
+            <div className="flex justify-center">
+              <Controller
+                name="code"
+                control={control}
+                render={({ field }) => (
+                  <InputOTP maxLength={6} {...field} id="code" autoComplete="one-time-code">
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSeparator />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                )}
+              />
+            </div>
             <FieldError errors={[errors.code]} />
           </Field>
 
