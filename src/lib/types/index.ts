@@ -81,6 +81,7 @@ export type DonationType = components['schemas']['DonationTypeResponseDto']
 export type Slot = components['schemas']['SlotResponseDto']
 export type Booking = components['schemas']['BookingResponseDto'] & {
   donor?: {
+    email?: string | null
     donorProfile?: {
       firstName: string | null
       lastName: string | null
