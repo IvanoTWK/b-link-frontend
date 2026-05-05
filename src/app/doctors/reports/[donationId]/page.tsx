@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   CheckCircle2,
   ClipboardList,
+  Download,
   Droplets,
   FlaskConical,
   Layers,
@@ -18,6 +19,7 @@ import { toast } from 'sonner'
 
 import { apiClient } from '@/lib/api/axios'
 import type { Donation, DonorProfile } from '@/lib/types'
+import { generateReportPdf } from '@/lib/utils/generate-report-pdf'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -189,6 +191,29 @@ export default function DoctorReportDetailPage() {
   const bookingStatus = (donation as DonationWithBooking).booking?.status
   const canCompile = bookingStatus === 'IN_AWAITING_REPORT' && !hasReport
 
+  // ── Download PDF ──────────────────────────────────────────────────────────
+  const handleDownloadPdf = () => {
+    if (!donation.medicalReport?.entries || !donorProfile) return
+    generateReportPdf({
+      donorFirstName: donorProfile.firstName,
+      donorLastName: donorProfile.lastName,
+      donorFiscalCode: donorProfile.fiscalCode,
+      donorDateOfBirth: donorProfile.dateOfBirth,
+      donorBiologicalSex: donorProfile.biologicalSex,
+      donationTypeName: donation.donationType?.name ?? '—',
+      donatedAt: donation.donatedAt,
+      centerName: donation.center?.name,
+      centerCity: donation.center?.city,
+      entries: donation.medicalReport.entries.map((e) => ({
+        parameterName: e.parameterName,
+        unit: e.unit,
+        measuredValue: e.measuredValue,
+        refMin: e.refMin,
+        refMax: e.refMax,
+      })),
+    })
+  }
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
@@ -208,12 +233,22 @@ export default function DoctorReportDetailPage() {
       {hasReport && (
         <div className="flex items-center gap-4 rounded-xl border bg-green-500/5 border-green-500/20 px-5 py-5">
           <CheckCircle2 className="h-6 w-6 text-green-500" />
-          <div>
+          <div className="flex-1">
             <p className="text-lg font-semibold">Referto già compilato</p>
             <p className="text-sm text-muted-foreground">
               Questa donazione ha già un referto associato.
             </p>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 shrink-0"
+            onClick={handleDownloadPdf}
+            disabled={!donorProfile}
+          >
+            <Download className="h-4 w-4" />
+            Scarica PDF
+          </Button>
         </div>
       )}
 
