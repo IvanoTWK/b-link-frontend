@@ -1,13 +1,15 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { CalendarDays, Droplets, GalleryVerticalEnd, LayoutDashboard, LogOut, User } from "lucide-react"
+import { CalendarDays, Droplets, LayoutDashboard, LogOut, User } from "lucide-react"
 
 import { useAuthStore } from "@/lib/store/auth.store"
 import { apiClient } from "@/lib/api/axios"
 import { DatePicker } from "@/components/ui/date-picker"
+import { LogoutConfirmDialog } from "@/components/ui/logout-confirm-dialog"
 import {
   Sidebar,
   SidebarContent,
@@ -53,9 +55,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/donors">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <GalleryVerticalEnd className="size-4" />
-                </div>
+                <Image src="/b-link.svg" alt="B-Link" width={32} height={32} className="rounded-lg shrink-0" />
                 <span className="font-semibold text-lg tracking-tight">B-Link</span>
               </Link>
             </SidebarMenuButton>
@@ -101,14 +101,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <div className="p-2">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton
-                size="lg"
-                onClick={handleLogout}
-                className="[&_svg]:size-5 font-semibold text-base tracking-tight"
-              >
-                <LogOut />
-                <span>Esci</span>
-              </SidebarMenuButton>
+              <LogoutConfirmDialog
+                onConfirm={handleLogout}
+                trigger={
+                  <SidebarMenuButton
+                    size="lg"
+                    className="[&_svg]:size-5 font-semibold text-base tracking-tight"
+                  >
+                    <LogOut />
+                    <span>Esci</span>
+                  </SidebarMenuButton>
+                }
+              />
             </SidebarMenuItem>
           </SidebarMenu>
         </div>
