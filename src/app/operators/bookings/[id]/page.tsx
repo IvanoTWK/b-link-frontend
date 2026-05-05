@@ -17,8 +17,9 @@ import {
 } from 'lucide-react'
 
 import { apiClient } from '@/lib/api/axios'
-import type { Booking } from '@/lib/types'
+import type { Booking, AnamnesisForm, AnamnesisQuestion } from '@/lib/types'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { OperatorBookingActions } from '@/components/operators/bookings/operator-booking-actions'
@@ -90,6 +91,17 @@ async function fetchBooking(id: string): Promise<Booking> {
   return data
 }
 
+async function fetchAnamnesis(id: string): Promise<AnamnesisForm> {
+  const { data } = await apiClient.get<AnamnesisForm>(`/bookings/${id}/anamnesis`)
+  return data
+}
+
+async function fetchQuestions(formVersion?: string): Promise<AnamnesisQuestion[]> {
+  const params = formVersion ? { formVersion } : {}
+  const { data } = await apiClient.get<AnamnesisQuestion[]>('/anamnesis/questions', { params })
+  return data
+}
+
 // ── Info row ──────────────────────────────────────────────────────────────────
 
 function InfoRow({ label, value }: { label: string; value?: string | null }) {
@@ -110,6 +122,19 @@ export default function OperatorBookingDetailPage() {
   const { data: booking, isLoading, isError } = useQuery({
     queryKey: ['operator', 'booking', id],
     queryFn: () => fetchBooking(id),
+  })
+
+  const { data: anamnesis, isLoading: anamnesisLoading } = useQuery({
+    queryKey: ['operator', 'bookings', id, 'anamnesis'],
+    queryFn: () => fetchAnamnesis(id),
+    enabled: !!booking,
+    retry: false,
+  })
+
+  const { data: questions, isLoading: questionsLoading } = useQuery({
+    queryKey: ['anamnesis', 'questions', anamnesis?.formVersion],
+    queryFn: () => fetchQuestions(anamnesis?.formVersion),
+    enabled: !!anamnesis,
   })
 
   // ── Loading ────────────────────────────────────────────────────────────────
@@ -138,8 +163,15 @@ export default function OperatorBookingDetailPage() {
   const code = booking.donationType?.code ?? 'SI'
   const gradient = TYPE_GRADIENT[code] ?? TYPE_GRADIENT['SI']
   const icon = TYPE_ICON[code] ?? TYPE_ICON['SI']
-  const hasAnamnesis = !!booking.anamnesisForm
   const canAct = booking.status === 'CONFIRMED' || booking.status === 'IN_AWAITING_REPORT'
+
+  // Mappa questionCode → testo della domanda
+  const questionTextMap = Object.fromEntries(
+    (questions ?? []).map((q) => [q.code, q.text])
+  )
+
+  const anamnesisAnswers = anamnesis?.answers ?? []
+  const isAnamnesisReady = !anamnesisLoading && !questionsLoading
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -167,15 +199,15 @@ export default function OperatorBookingDetailPage() {
                 {CANCELLATION_REASON_LABEL[booking.cancellationReason] ?? booking.cancellationReason}
               </p>
             )}
-            {booking.status === 'CONFIRMED' && !hasAnamnesis && (
+            {booking.status === 'CONFIRMED' && !anamnesis && !anamnesisLoading && (
               <p className="text-xs text-muted-foreground mt-0.5">
                 Il donatore non ha ancora compilato il questionario anamnestico.
               </p>
             )}
-            {booking.status === 'CONFIRMED' && hasAnamnesis && (
+            {booking.status === 'CONFIRMED' && anamnesis && (
               <p className="text-xs text-muted-foreground mt-0.5">
                 Questionario compilato il{' '}
-                {formatDateShort(booking.anamnesisForm!.compiledAt)}.
+                {formatDateShort(anamnesis.compiledAt)}.
               </p>
             )}
           </div>
@@ -281,32 +313,59 @@ export default function OperatorBookingDetailPage() {
       </div>
 
       {/* Anamnesi */}
-      {hasAnamnesis && (
-        <Card className="border-border">
-          <CardContent className="p-5 flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4 text-muted-foreground" />
-              <p className="text-sm font-semibold">Questionario anamnestico</p>
+      <Card className="border-border">
+        <CardContent className="p-5 flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <ClipboardList className="h-4 w-4 text-muted-foreground" />
+            <p className="text-sm font-semibold">Anamnesi</p>
+            {anamnesis && (
               <span className="text-xs text-muted-foreground">
-                · versione {booking.anamnesisForm!.formVersion} · compilato il{' '}
-                {formatDateShort(booking.anamnesisForm!.compiledAt)}
+                · versione {anamnesis.formVersion} · compilata il{' '}
+                {formatDateShort(anamnesis.compiledAt)}
               </span>
+            )}
+          </div>
+
+          {/* Loading state */}
+          {(anamnesisLoading || (anamnesis && questionsLoading)) && (
+            <div className="flex flex-col gap-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {booking.anamnesisForm!.answers.map((answer) => (
-                <div key={answer.id} className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-muted/50">
-                  <span className="text-xs font-medium text-muted-foreground font-mono">
-                    {answer.questionCode}
-                  </span>
-                  <span className={`text-xs font-semibold ${answer.answer ? 'text-destructive' : 'text-green-600 dark:text-green-400'}`}>
-                    {answer.answer ? 'Sì' : 'No'}
-                  </span>
+          )}
+
+          {/* Anamnesi non compilata */}
+          {isAnamnesisReady && !anamnesis && (
+            <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 px-4 py-4">
+              <XCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+              <p className="text-sm text-muted-foreground">Anamnesi non ancora compilata.</p>
+            </div>
+          )}
+
+          {/* Risposte */}
+          {isAnamnesisReady && anamnesis && anamnesisAnswers.length > 0 && (
+            <div className="flex flex-col gap-2">
+              {anamnesisAnswers.map((answer) => (
+                <div
+                  key={answer.id}
+                  className="flex items-start justify-between gap-4 rounded-xl border border-border px-4 py-3.5"
+                >
+                  <p className="text-sm leading-snug flex-1">
+                    {questionTextMap[answer.questionCode] ?? answer.questionCode}
+                  </p>
+                  <Badge
+                    variant={answer.answer ? 'destructive' : 'secondary'}
+                    className="shrink-0 mt-0.5"
+                  >
+                    {answer.answer ? 'Si' : 'No'}
+                  </Badge>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
 
     </div>
   )
