@@ -1,15 +1,8 @@
 'use client'
 
 import { Droplets, Users } from 'lucide-react'
-import type { BloodGroup, DonorProfile } from '@/lib/types'
-
-const BLOOD_GROUP_LABELS: Record<BloodGroup, string> = {
-  A_POSITIVE: 'A+', A_NEGATIVE: 'A-',
-  B_POSITIVE: 'B+', B_NEGATIVE: 'B-',
-  AB_POSITIVE: 'AB+', AB_NEGATIVE: 'AB-',
-  O_POSITIVE: '0+', O_NEGATIVE: '0-',
-  UNKNOWN: 'Sconosciuto',
-}
+import type { DonorProfile } from '@/lib/types'
+import { BLOOD_GROUP_LABELS } from '@/lib/utils/blood-group'
 
 const BIOLOGICAL_SEX_LABELS: Record<string, string> = {
   MALE: 'Maschio',

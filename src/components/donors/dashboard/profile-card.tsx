@@ -3,17 +3,9 @@
 import { Users } from 'lucide-react'
 
 import { useDonorProfile } from '@/hooks/use-donor-profile'
-import type { BloodGroup } from '@/lib/types'
+import { BLOOD_GROUP_LABELS } from '@/lib/utils/blood-group'
 import { BentoCard } from '@/components/ui/bento-grid'
 import { Skeleton } from '@/components/ui/skeleton'
-
-const BLOOD_GROUP_LABELS: Record<BloodGroup, string> = {
-  A_POSITIVE: 'A+', A_NEGATIVE: 'A-',
-  B_POSITIVE: 'B+', B_NEGATIVE: 'B-',
-  AB_POSITIVE: 'AB+', AB_NEGATIVE: 'AB-',
-  O_POSITIVE: '0+', O_NEGATIVE: '0-',
-  UNKNOWN: '—',
-}
 
 const BIOLOGICAL_SEX_LABELS: Record<string, string> = {
   MALE: 'Maschio',

@@ -7,7 +7,8 @@ import {
 } from 'lucide-react'
 
 import { apiClient } from '@/lib/api/axios'
-import type { Donation } from '@/lib/types'
+import type { Donation, DonorProfile } from '@/lib/types'
+import { generateReportPdf } from '@/lib/utils/generate-report-pdf'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BentoCard, BentoGrid } from '@/components/ui/bento-grid'
@@ -54,6 +55,11 @@ async function fetchDonation(id: string): Promise<Donation> {
   return data
 }
 
+async function fetchOwnProfile(): Promise<DonorProfile> {
+  const { data } = await apiClient.get<DonorProfile>('/donors/profile')
+  return data
+}
+
 // ── Pagina ────────────────────────────────────────────────────────────────────
 
 export default function DonationDetailPage() {
@@ -63,6 +69,11 @@ export default function DonationDetailPage() {
   const { data: donation, isLoading, isError } = useQuery({
     queryKey: ['donor', 'donation', id],
     queryFn: () => fetchDonation(id),
+  })
+
+  const { data: ownProfile } = useQuery({
+    queryKey: ['donor', 'profile'],
+    queryFn: fetchOwnProfile,
   })
 
   // ── Loading ────────────────────────────────────────────────────────────────
@@ -95,33 +106,44 @@ export default function DonationDetailPage() {
   const reportAvailable = donation.booking?.status === 'COMPLETED'
   const report = donation.medicalReport
 
-  const handlePrint = () => window.print()
+  const handleDownloadPdf = () => {
+    if (!report?.entries || !ownProfile) return
+    generateReportPdf({
+      donorFirstName: ownProfile.firstName,
+      donorLastName: ownProfile.lastName,
+      donorFiscalCode: ownProfile.fiscalCode,
+      donorDateOfBirth: ownProfile.dateOfBirth,
+      donorBiologicalSex: ownProfile.biologicalSex,
+      donationTypeName: donation!.donationType?.name ?? '—',
+      donatedAt: donation!.donatedAt,
+      centerName: donation!.center?.name,
+      centerCity: donation!.center?.city,
+      entries: report.entries.map((e) => ({
+        parameterName: e.parameterName,
+        unit: e.unit,
+        measuredValue: e.measuredValue,
+        refMin: e.refMin,
+        refMax: e.refMax,
+      })),
+    })
+  }
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <>
-      {/* ── Stili di stampa ── */}
-      <style>{`
-        @media print {
-          body > * { display: none !important; }
-          #printable-report { display: block !important; padding: 2rem; }
-        }
-      `}</style>
-
-      <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-col gap-6 w-full">
 
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => router.back()} className="print:hidden">
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
             <h1 className="text-xl font-semibold">Dettaglio donazione</h1>
             <p className="text-xs text-muted-foreground font-mono">{donation.id}</p>
           </div>
-          {reportAvailable && (
-            <Button size="sm" variant="outline" onClick={handlePrint} className="print:hidden gap-2">
+          {reportAvailable && report && (
+            <Button size="sm" variant="outline" onClick={handleDownloadPdf} disabled={!ownProfile} className="gap-2">
               <Download className="h-4 w-4" />
               Scarica referto
             </Button>
@@ -247,52 +269,6 @@ export default function DonationDetailPage() {
           />
 
         </BentoGrid>
-      </div>
-
-      {/* ── Sezione stampabile (invisibile a schermo, visibile in stampa) ────── */}
-      {reportAvailable && report && (
-        <div id="printable-report" className="hidden print:block" aria-hidden="true">
-          <div style={{ fontFamily: 'sans-serif', fontSize: 14, color: '#111' }}>
-            <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Referto Medico</h1>
-            <p style={{ color: '#555', marginBottom: 20 }}>
-              {donation.donationType?.name} — {donatedAtLabel}
-              {donation.center && ` — ${donation.center.name}, ${donation.center.city}`}
-            </p>
-            <p style={{ color: '#555', marginBottom: 20, fontSize: 12 }}>
-              Compilato il {new Date(report.compiledAt).toLocaleDateString('it-IT')}
-            </p>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid #ddd' }}>
-                  <th style={{ textAlign: 'left', padding: '6px 8px' }}>Parametro</th>
-                  <th style={{ textAlign: 'right', padding: '6px 8px' }}>Valore</th>
-                  <th style={{ textAlign: 'left', padding: '6px 8px' }}>Unità</th>
-                  <th style={{ textAlign: 'center', padding: '6px 8px' }}>Intervallo</th>
-                  <th style={{ textAlign: 'center', padding: '6px 8px' }}>Esito</th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.entries.map((entry, i) => {
-                  const inRange = entry.measuredValue >= entry.refMin && entry.measuredValue <= entry.refMax
-                  return (
-                    <tr key={entry.id} style={{ borderBottom: '1px solid #eee', background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
-                      <td style={{ padding: '6px 8px', fontWeight: 500 }}>{entry.parameterName}</td>
-                      <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: 'monospace' }}>{entry.measuredValue}</td>
-                      <td style={{ padding: '6px 8px', color: '#555' }}>{entry.unit}</td>
-                      <td style={{ padding: '6px 8px', textAlign: 'center', color: '#555', fontFamily: 'monospace' }}>
-                        {entry.refMin} – {entry.refMax}
-                      </td>
-                      <td style={{ padding: '6px 8px', textAlign: 'center', color: inRange ? '#16a34a' : '#dc2626', fontWeight: 600 }}>
-                        {inRange ? '✓ Nella norma' : '✗ Fuori norma'}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   )
 }

@@ -11,7 +11,8 @@ import {
   updateDonorProfileSchema,
   type UpdateDonorProfileFormValues,
 } from '@/lib/schemas/donors/update-donor-profile.schema'
-import type { BloodGroup, DonorProfile } from '@/lib/types'
+import type { DonorProfile } from '@/lib/types'
+import { BLOOD_GROUP_LABELS } from '@/lib/utils/blood-group'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Field, FieldLabel, FieldError, FieldGroup } from '@/components/ui/field'
@@ -22,13 +23,6 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
 
-const BLOOD_GROUP_LABELS: Record<BloodGroup, string> = {
-  A_POSITIVE: 'A+', A_NEGATIVE: 'A-',
-  B_POSITIVE: 'B+', B_NEGATIVE: 'B-',
-  AB_POSITIVE: 'AB+', AB_NEGATIVE: 'AB-',
-  O_POSITIVE: '0+', O_NEGATIVE: '0-',
-  UNKNOWN: 'Sconosciuto',
-}
 
 function CardHeader({ icon: Icon, title, description }: {
   icon: React.ElementType
