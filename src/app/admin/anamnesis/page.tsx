@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 
 import { apiClient } from '@/lib/api/axios'
 import type { AnamnesisQuestion } from '@/lib/types'
+import { TablePaginator } from '@/components/ui/table-paginator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -165,7 +166,7 @@ function CreateQuestionDialog({
                 <FieldLabel htmlFor="q-version">Versione modulo</FieldLabel>
                 <Input
                   id="q-version"
-                  placeholder="2024-01-01"
+                  placeholder="es. v1"
                   aria-invalid={!!errors.formVersion}
                   {...register('formVersion')}
                 />
@@ -263,7 +264,7 @@ function EditQuestionDialog({
                 <FieldLabel htmlFor="eq-version">Versione modulo</FieldLabel>
                 <Input
                   id="eq-version"
-                  placeholder="2024-01-01"
+                  placeholder="es. v1"
                   aria-invalid={!!errors.formVersion}
                   {...register('formVersion')}
                 />
@@ -292,6 +293,8 @@ export default function AdminAnamnesisPage() {
   const [editQuestion, setEditQuestion] = useState<AnamnesisQuestion | null>(null)
   const [deactivateQuestion, setDeactivateQuestion] = useState<AnamnesisQuestion | null>(null)
   const [filterVersion, setFilterVersion] = useState('')
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
   const queryClient = useQueryClient()
 
   const { data: questions = [], isLoading, isError } = useQuery({
@@ -335,7 +338,7 @@ export default function AdminAnamnesisPage() {
       {/* Filtro versione */}
       <div className="flex items-center gap-3 max-w-sm">
         <Input
-          placeholder="Filtra per versione (es. 2024-01-01)"
+          placeholder="Filtra per versione (es. v1)"
           value={filterVersion}
           onChange={(e) => handleVersionChange(e.target.value)}
         />
@@ -361,6 +364,7 @@ export default function AdminAnamnesisPage() {
       ) : questions.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nessuna domanda trovata.</p>
       ) : (
+        <div className="flex flex-col gap-3">
         <div className="w-full rounded-xl border border-border overflow-hidden">
           <Table>
             <TableHeader>
@@ -374,7 +378,7 @@ export default function AdminAnamnesisPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {questions.map((q) => (
+              {questions.slice(page * pageSize, (page + 1) * pageSize).map((q) => (
                 <TableRow key={q.id}>
                   <TableCell className="pl-5 py-3">
                     <span className="text-sm text-muted-foreground">{q.order}</span>
@@ -421,6 +425,14 @@ export default function AdminAnamnesisPage() {
               ))}
             </TableBody>
           </Table>
+        </div>
+        <TablePaginator
+          page={page}
+          pageSize={pageSize}
+          total={questions.length}
+          onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(0) }}
+        />
         </div>
       )}
 

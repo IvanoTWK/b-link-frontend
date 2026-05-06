@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Users } from 'lucide-react'
 
@@ -21,6 +22,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
+import { TablePaginator } from '@/components/ui/table-paginator'
 
 // ── Tipi ──────────────────────────────────────────────────────────────────────
 
@@ -33,6 +35,8 @@ interface OperatorDonorsTableProps {
 
 export function OperatorDonorsTable({ donors, isLoading }: OperatorDonorsTableProps) {
   const router = useRouter()
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
 
   if (isLoading) {
     return (
@@ -63,38 +67,56 @@ export function OperatorDonorsTable({ donors, isLoading }: OperatorDonorsTablePr
     )
   }
 
+  const paged = donors.slice(page * pageSize, (page + 1) * pageSize)
+
   return (
-    <div className="w-full rounded-xl border border-border overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow className="hover:bg-transparent">
-            <TableHead className="pl-5 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Nominativo
-            </TableHead>
-            <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Telefono
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {donors.map((donor) => (
-            <TableRow
-              key={donor.id}
-              className="cursor-pointer"
-              onClick={() => router.push(`/operators/donors/${donor.id}`)}
-            >
-              <TableCell className="pl-5 py-3">
-                <span className="text-sm font-semibold">
-                  {donor.firstName} {donor.lastName}
-                </span>
-              </TableCell>
-              <TableCell className="py-3">
-                <span className="text-sm">{donor.phone ?? '—'}</span>
-              </TableCell>
+    <div className="flex flex-col gap-3">
+      <div className="w-full rounded-xl border border-border overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="pl-5 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Nominativo
+              </TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Email
+              </TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Telefono
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {paged.map((donor) => (
+              <TableRow
+                key={donor.id}
+                className="cursor-pointer"
+                onClick={() => router.push(`/operators/donors/${donor.id}`)}
+              >
+                <TableCell className="pl-5 py-3">
+                  <span className="text-sm font-semibold">
+                    {donor.firstName} {donor.lastName}
+                  </span>
+                </TableCell>
+                <TableCell className="py-3">
+                  <span className="text-sm text-muted-foreground">{donor.email ?? '—'}</span>
+                </TableCell>
+                <TableCell className="py-3">
+                  <span className="text-sm">{donor.phone ?? '—'}</span>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <TablePaginator
+        page={page}
+        pageSize={pageSize}
+        total={donors.length}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => { setPageSize(s); setPage(0) }}
+      />
     </div>
   )
 }

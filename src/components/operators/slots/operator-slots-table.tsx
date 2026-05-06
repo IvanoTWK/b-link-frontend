@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { Info, Rows3, Trash2 } from 'lucide-react'
 
 import type { Slot } from '@/lib/types'
 import { Button } from '@/components/ui/button'
+import { TablePaginator } from '@/components/ui/table-paginator'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Tooltip,
@@ -46,6 +48,9 @@ interface OperatorSlotsTableProps {
 // ── Componente ────────────────────────────────────────────────────────────────
 
 export function OperatorSlotsTable({ slots, isLoading, onDelete, isDeleting, onUpdate, isUpdating }: OperatorSlotsTableProps) {
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
+
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -75,7 +80,10 @@ export function OperatorSlotsTable({ slots, isLoading, onDelete, isDeleting, onU
     )
   }
 
+  const paged = slots.slice(page * pageSize, (page + 1) * pageSize)
+
   return (
+    <div className="flex flex-col gap-3">
     <div className="w-full rounded-xl border border-border overflow-hidden">
       <Table>
         <TableHeader>
@@ -99,7 +107,7 @@ export function OperatorSlotsTable({ slots, isLoading, onDelete, isDeleting, onU
           </TableRow>
         </TableHeader>
         <TableBody>
-          {slots.map((slot) => (
+          {paged.map((slot) => (
             <TableRow key={slot.id}>
               <TableCell className="pl-5 py-3">
                 <span className="text-sm font-semibold">
@@ -162,6 +170,15 @@ export function OperatorSlotsTable({ slots, isLoading, onDelete, isDeleting, onU
           ))}
         </TableBody>
       </Table>
+    </div>
+
+    <TablePaginator
+      page={page}
+      pageSize={pageSize}
+      total={slots.length}
+      onPageChange={setPage}
+      onPageSizeChange={(s) => { setPageSize(s); setPage(0) }}
+    />
     </div>
   )
 }

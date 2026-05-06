@@ -9,6 +9,7 @@ import { apiClient } from '@/lib/api/axios'
 import { formatBloodGroup } from '@/lib/utils/blood-group'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { TablePaginator } from '@/components/ui/table-paginator'
 import {
   Table,
   TableBody,
@@ -45,6 +46,8 @@ async function searchDonors(q: string): Promise<DonorSearchResult[]> {
 export default function DoctorDonorsPage() {
   const [search, setSearch] = useState('')
   const [query, setQuery] = useState('')
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
 
   const { data: donors = [], isLoading, isError } = useQuery({
     queryKey: ['doctor', 'donors', query],
@@ -110,6 +113,7 @@ export default function DoctorDonorsPage() {
             : 'Nessun donatore nel tuo centro.'}
         </p>
       ) : (
+        <div className="flex flex-col gap-3">
         <div className="rounded-xl border border-border overflow-hidden">
           <Table>
             <TableHeader>
@@ -122,7 +126,7 @@ export default function DoctorDonorsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {donors.map((donor) => (
+              {donors.slice(page * pageSize, (page + 1) * pageSize).map((donor) => (
                 <TableRow key={donor.id}>
                   <TableCell className="font-medium">{donor.firstName}</TableCell>
                   <TableCell>{donor.lastName}</TableCell>
@@ -143,6 +147,14 @@ export default function DoctorDonorsPage() {
               ))}
             </TableBody>
           </Table>
+        </div>
+        <TablePaginator
+          page={page}
+          pageSize={pageSize}
+          total={donors.length}
+          onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(0) }}
+        />
         </div>
       )}
     </div>

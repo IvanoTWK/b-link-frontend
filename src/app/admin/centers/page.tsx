@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { apiClient } from '@/lib/api/axios'
 import type { Center } from '@/lib/types'
 import { Button } from '@/components/ui/button'
+import { TablePaginator } from '@/components/ui/table-paginator'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -225,6 +226,8 @@ export default function AdminCentersPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [editCenter, setEditCenter] = useState<Center | null>(null)
   const [deleteCenter, setDeleteCenter] = useState<Center | null>(null)
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
   const queryClient = useQueryClient()
 
   const { data, isLoading, isError } = useQuery({
@@ -278,6 +281,7 @@ export default function AdminCentersPage() {
       ) : centers.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nessun centro trovato.</p>
       ) : (
+        <div className="flex flex-col gap-3">
         <div className="w-full rounded-xl border border-border overflow-hidden">
           <Table>
             <TableHeader>
@@ -291,7 +295,7 @@ export default function AdminCentersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {centers.map((c) => (
+              {centers.slice(page * pageSize, (page + 1) * pageSize).map((c) => (
                 <TableRow key={c.id}>
                   <TableCell className="pl-5 py-3">
                     <span className="text-sm font-semibold">{c.name}</span>
@@ -336,6 +340,14 @@ export default function AdminCentersPage() {
               ))}
             </TableBody>
           </Table>
+        </div>
+        <TablePaginator
+          page={page}
+          pageSize={pageSize}
+          total={centers.length}
+          onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(0) }}
+        />
         </div>
       )}
 

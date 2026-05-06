@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
+import { TablePaginator } from '@/components/ui/table-paginator'
 import {
   Table,
   TableBody,
@@ -92,6 +93,8 @@ function ActionBadge({ action }: { action: string }) {
 export default function AdminAuditLogsPage() {
   const [filters, setFilters] = useState<AuditLogFilters>(EMPTY_FILTERS)
   const [appliedFilters, setAppliedFilters] = useState<AuditLogFilters>(EMPTY_FILTERS)
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
 
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
@@ -104,14 +107,17 @@ export default function AdminAuditLogsPage() {
 
   const handleApplyFilters = useCallback(() => {
     setAppliedFilters({ ...filters })
+    setPage(0)
   }, [filters])
 
   const handleResetFilters = useCallback(() => {
     setFilters(EMPTY_FILTERS)
     setAppliedFilters(EMPTY_FILTERS)
+    setPage(0)
   }, [])
 
   const allLogs = data?.pages.flatMap((p) => p.items) ?? []
+  const paged = allLogs.slice(page * pageSize, (page + 1) * pageSize)
 
   return (
     <div className="flex flex-col gap-6 min-h-[calc(100dvh-6.5rem)]">
@@ -182,7 +188,7 @@ export default function AdminAuditLogsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {allLogs.map((log) => (
+              {paged.map((log) => (
                 <TableRow key={log.id}>
                   <TableCell className="pl-5 py-3 whitespace-nowrap">
                     <span className="text-xs text-muted-foreground">
@@ -224,16 +230,27 @@ export default function AdminAuditLogsPage() {
         </div>
       )}
 
-      {/* Carica altri */}
+      {/* Paginazione */}
+      {!isLoading && allLogs.length > 0 && (
+        <TablePaginator
+          page={page}
+          pageSize={pageSize}
+          total={allLogs.length}
+          onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(0) }}
+        />
+      )}
+
+      {/* Carica altri dal server */}
       {hasNextPage && (
-        <div className="flex justify-center pt-2">
+        <div className="flex justify-center">
           <Button
             variant="outline"
             size="sm"
             onClick={() => fetchNextPage()}
             disabled={isFetchingNextPage}
           >
-            {isFetchingNextPage ? 'Caricamento...' : 'Carica altri'}
+            {isFetchingNextPage ? 'Caricamento...' : 'Carica altri log'}
           </Button>
         </div>
       )}

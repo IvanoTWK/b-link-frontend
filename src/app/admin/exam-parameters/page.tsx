@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { TablePaginator } from '@/components/ui/table-paginator'
 import { Field, FieldLabel, FieldError, FieldGroup } from '@/components/ui/field'
 import {
   Dialog,
@@ -236,6 +237,8 @@ export default function AdminExamParametersPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [editParam, setEditParam] = useState<ExamParameter | null>(null)
   const [deactivateParam, setDeactivateParam] = useState<ExamParameter | null>(null)
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
   const queryClient = useQueryClient()
 
   const { data: params = [], isLoading, isError } = useQuery({
@@ -287,6 +290,7 @@ export default function AdminExamParametersPage() {
       ) : params.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nessun parametro trovato.</p>
       ) : (
+        <div className="flex flex-col gap-3">
         <div className="w-full rounded-xl border border-border overflow-hidden">
           <Table>
             <TableHeader>
@@ -300,7 +304,7 @@ export default function AdminExamParametersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {params.map((p) => (
+              {params.slice(page * pageSize, (page + 1) * pageSize).map((p) => (
                 <TableRow key={p.id}>
                   <TableCell className="pl-5 py-3">
                     <span className="text-sm font-semibold">{p.name}</span>
@@ -351,6 +355,14 @@ export default function AdminExamParametersPage() {
               ))}
             </TableBody>
           </Table>
+        </div>
+        <TablePaginator
+          page={page}
+          pageSize={pageSize}
+          total={params.length}
+          onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(0) }}
+        />
         </div>
       )}
 
