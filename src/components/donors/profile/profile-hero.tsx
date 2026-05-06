@@ -2,7 +2,7 @@
 
 import { Droplets, Users } from 'lucide-react'
 import type { DonorProfile } from '@/lib/types'
-import { BLOOD_GROUP_LABELS } from '@/lib/utils/blood-group'
+import { formatBloodGroup } from '@/lib/utils/blood-group'
 
 const BIOLOGICAL_SEX_LABELS: Record<string, string> = {
   MALE: 'Maschio',
@@ -20,7 +20,7 @@ interface ProfileHeroProps {
 export function ProfileHero({ profile }: ProfileHeroProps) {
   const bloodLabel =
     profile.bloodGroup && profile.bloodGroup !== 'UNKNOWN'
-      ? BLOOD_GROUP_LABELS[profile.bloodGroup as BloodGroup]
+      ? formatBloodGroup(profile.bloodGroup)
       : null
   const sexLabel = BIOLOGICAL_SEX_LABELS[profile.biologicalSex] ?? profile.biologicalSex
 

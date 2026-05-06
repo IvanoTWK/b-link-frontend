@@ -109,7 +109,7 @@ export function HealthDataCard({ profile }: HealthDataCardProps) {
                         <SelectValue placeholder="Seleziona..." />
                       </SelectTrigger>
                       <SelectContent>
-                        {(Object.entries(BLOOD_GROUP_LABELS) as [BloodGroup, string][]).map(([value, label]) => (
+                        {(Object.entries(BLOOD_GROUP_LABELS) as [string, string][]).map(([value, label]) => (
                           <SelectItem key={value} value={value}>{label}</SelectItem>
                         ))}
                       </SelectContent>

@@ -14,10 +14,11 @@ import {
 } from "@/components/ui/breadcrumb"
 
 const SEGMENT_LABELS: Record<string, string> = {
-  operators: "Operators",
+  operators: "Operatori",
   bookings: "Prenotazioni",
   slots: "Slot",
   donors: "Donatori",
+  profile: "Profilo",
 }
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i

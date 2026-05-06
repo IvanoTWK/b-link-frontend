@@ -3,7 +3,7 @@
 import { Users } from 'lucide-react'
 
 import { useDonorProfile } from '@/hooks/use-donor-profile'
-import { BLOOD_GROUP_LABELS } from '@/lib/utils/blood-group'
+import { formatBloodGroup } from '@/lib/utils/blood-group'
 import { BentoCard } from '@/components/ui/bento-grid'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -23,7 +23,7 @@ export function ProfileCard() {
 
   const bloodLabel =
     profile.bloodGroup && profile.bloodGroup !== 'UNKNOWN'
-      ? BLOOD_GROUP_LABELS[profile.bloodGroup as BloodGroup]
+      ? formatBloodGroup(profile.bloodGroup)
       : null
   const sexLabel = BIOLOGICAL_SEX_LABELS[profile.biologicalSex] ?? profile.biologicalSex
   const description = [bloodLabel, sexLabel].filter(Boolean).join(' · ')
