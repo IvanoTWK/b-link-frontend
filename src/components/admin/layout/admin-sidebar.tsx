@@ -50,7 +50,7 @@ const NAV_GESTIONE = [
 
 const NAV_SISTEMA = [
   { href: "/admin/audit-logs", label: "Audit log", icon: ScrollText, exact: false },
-  { href: "/admin/gdpr", label: "GDPR", icon: ShieldCheck, exact: false },
+  { href: "/admin/consensi", label: "Consensi", icon: ShieldCheck, exact: false },
 ]
 
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

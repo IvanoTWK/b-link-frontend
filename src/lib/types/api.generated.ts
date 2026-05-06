@@ -1807,8 +1807,7 @@ export interface components {
         };
         CreateGdprRequestDto: {
             /** @enum {string} */
-            type: "EXPORT" | "DELETION" | "RECTIFICATION";
-            notes?: string;
+            type: "REVOKE_CONSENT";
         };
         GdprRequestResponseDto: {
             /** @example clxyz123 */
@@ -1819,23 +1818,19 @@ export interface components {
              */
             donorId: string;
             /**
-             * @example EXPORT
+             * @example REVOKE_CONSENT
              * @enum {string}
              */
-            type: "EXPORT" | "DELETION" | "RECTIFICATION";
+            type: "REVOKE_CONSENT";
             /**
              * @example PENDING
              * @enum {string}
              */
             status: "PENDING" | "COMPLETED" | "CANCELLED";
-            /** @example Richiesta di rettifica indirizzo. */
-            notes: string | null;
             /** @example 2024-06-01T10:00:00.000Z */
             requestedAt: string;
             /** @example null */
             handledAt: string | null;
-            /** @description Presente solo per richieste EXPORT giÃ  gestite. */
-            exportData?: Record<string, never> | null;
         };
         PaginatedGdprRequestResponseDto: {
             /**
@@ -1845,9 +1840,7 @@ export interface components {
             nextCursor: string | null;
             items: components["schemas"]["GdprRequestResponseDto"][];
         };
-        HandleGdprRequestDto: {
-            notes?: string;
-        };
+        HandleGdprRequestDto: Record<string, never>;
         DonorSearchResultResponseDto: {
             /** @example clxyz123 */
             id: string;
