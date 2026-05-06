@@ -27,7 +27,7 @@ import { DoctorReportForm, type ExamParameter } from '@/components/doctors/repor
 
 // ── Tipi estesi ────────────────────────────────────────────────────────────────
 
-interface DonationWithBooking extends Donation {
+type DonationWithBooking = Omit<Donation, 'booking'> & {
   booking?: {
     id?: string
     status?: string

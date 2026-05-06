@@ -187,12 +187,8 @@ export function generateReportPdf(data: ReportPdfData): void {
   y += 7
 
   // Righe tabella
-  data.entries.forEach((entry, i) => {
+  data.entries.forEach((entry) => {
     const inRange = entry.measuredValue >= entry.refMin && entry.measuredValue <= entry.refMax
-    const rowBg: [number, number, number] = i % 2 === 0 ? [255, 255, 255] : [250, 250, 250]
-
-    doc.setFillColor(...rowBg)
-    doc.rect(margin, y, contentW, 8, 'F')
 
     doc.setTextColor(...DARK)
     doc.setFontSize(8)
@@ -226,31 +222,107 @@ export function generateReportPdf(data: ReportPdfData): void {
     y += 8
   })
 
-  y += 10
+  y += 12
 
-  // ── Footer firma ──────────────────────────────────────────────────────────────
-  // Se rimane poco spazio, vai a nuova pagina
-  if (y > 240) {
-    doc.addPage()
-    y = 20
-  }
+  // ── Footer firma e timbro (sovrapposti, destra) ──────────────────────────────
+  if (y > 232) { doc.addPage(); y = 20 }
 
-  doc.setDrawColor(220, 220, 220)
+  doc.setDrawColor(200, 200, 200)
   doc.setLineWidth(0.3)
   doc.line(margin, y, pageW - margin, y)
-  y += 8
+  y += 7
+
+  // Label
+  doc.setTextColor(...MED_GRAY)
+  doc.setFontSize(6.5)
+  doc.setFont('helvetica', 'bold')
+  doc.text('FIRMA E TIMBRO DEL MEDICO RESPONSABILE', pageW - margin, y, { align: 'right' })
+  y += 5
+
+  // Anchor comune: timbro e firma condividono la stessa zona (destra pagina)
+  const aX = pageW - margin - 68  // bordo sinistro zona firma/timbro
+  const aY = y + 22               // baseline della firma
+
+  // ── 1. Timbro (disegnato per primo = sotto) ───────────────────────────────────
+  const R = 13
+  // Leggermente spostato rispetto al centro firma, come su un documento reale
+  const stampCX = aX + 50
+  const stampCY = aY - 4
+
+  const BLK: [number, number, number] = [15, 15, 15]
+  doc.setDrawColor(...BLK)
+  doc.setLineWidth(1.1)
+  doc.circle(stampCX, stampCY, R, 'S')
+  doc.setLineWidth(0.32)
+  doc.circle(stampCX, stampCY, R - 2, 'S')
+
+  doc.setTextColor(...BLK)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(4.4)
+  doc.text('CENTRO TRASFUSIONALE', stampCX, stampCY - 6, { align: 'center' })
+  doc.setLineWidth(0.28)
+  doc.line(stampCX - 9, stampCY - 3, stampCX + 9, stampCY - 3)
+  doc.setFontSize(7.5)
+  doc.text('B\xb7Link', stampCX, stampCY + 1.5, { align: 'center' })
+  doc.setLineWidth(0.28)
+  doc.line(stampCX - 9, stampCY + 4.5, stampCX + 9, stampCY + 4.5)
+  doc.setFontSize(4)
+  doc.setFont('helvetica', 'normal')
+  doc.text('REFERTO CERTIFICATO', stampCX, stampCY + 8, { align: 'center' })
+  doc.setFontSize(5)
+  doc.text('\u00b7 \u00b7 \u00b7', stampCX, stampCY + 11, { align: 'center' })
+
+  // ── 2. Firma (disegnata per seconda = sopra) ──────────────────────────────────
+  const sX = aX
+  const sY = aY
+
+  doc.setDrawColor(10, 10, 10)
+  doc.setLineWidth(0.52)
+
+  // Lettera iniziale — grande arco corsivo (stile "D" o "M")
+  doc.lines([
+    [1.5, -13, 5, -16, 9,  -9],
+    [4,    8,  6,  12, 3,   8],
+    [1,   -4,  3,  -6, 5,  -3],
+  ], sX, sY, [1, 1], 'S')
+
+  // Connettore e seconda lettera
+  doc.lines([
+    [5,  -5, 10,  -7, 15,  -1],
+    [2,   5,  3,   7,  2,   4],
+    [4,  -2,  8,  -2, 11,   0],
+  ], sX + 10, sY, [1, 1], 'S')
+
+  // Terza lettera con piccola gobba
+  doc.lines([
+    [3,  -5,  7,  -6, 10,  -1],
+    [2,   5,  3,   6,  2,   3],
+    [5,  -1,  9,  -1, 13,   0],
+  ], sX + 28, sY, [1, 1], 'S')
+
+  // Tratto finale con discesa
+  doc.lines([
+    [4,   3,  8,   5, 12,   2],
+    [3,  -2,  5,  -3,  7,   0],
+  ], sX + 44, sY, [1, 1], 'S')
+
+  // Flourish — lunga curva di sottolineatura
+  doc.setLineWidth(0.35)
+  doc.lines([
+    [14, 3.5, 32, 2.5, 52, -2],
+    [3, -0.5,  4,   0,  3,  0.5],
+  ], sX, sY + 6, [1, 1], 'S')
+
+  // Linea firma
+  const sigLineY = sY + 16
+  doc.setDrawColor(155, 155, 155)
+  doc.setLineWidth(0.4)
+  doc.line(aX, sigLineY, aX + 66, sigLineY)
 
   doc.setTextColor(...MED_GRAY)
-  doc.setFontSize(7.5)
-  doc.setFont('helvetica', 'normal')
-  doc.text('Firma del Medico Responsabile', margin, y)
-  doc.text('Data e Timbro', pageW - margin - 50, y)
-
-  y += 12
-  doc.setDrawColor(150, 150, 150)
-  doc.setLineWidth(0.5)
-  doc.line(margin, y, margin + 70, y)
-  doc.line(pageW - margin - 50, y, pageW - margin, y)
+  doc.setFontSize(6.5)
+  doc.setFont('helvetica', 'italic')
+  doc.text('Dr. Medico Responsabile', aX, sigLineY + 5)
 
   // ── Footer pagina ─────────────────────────────────────────────────────────────
   const pageH = doc.internal.pageSize.getHeight()
