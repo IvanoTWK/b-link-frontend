@@ -1,3 +1,5 @@
+name: b-link-frontend
+
 services:
   frontend:
     build:
