@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -14,7 +14,6 @@ import {
   ClipboardList,
   BarChart3,
   UserCheck,
-  ChevronDown,
   ArrowRight,
   Heart,
   Lightbulb,
@@ -26,6 +25,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/lib/store/auth.store'
 import { ROLE_REDIRECT } from '@/lib/auth/constants'
+import { refreshClient } from '@/lib/api/axios'
+import type { AuthMeResponse } from '@/lib/types'
 
 // ── Dati ─────────────────────────────────────────────────────────────────────
 
@@ -96,14 +97,14 @@ const DONATION_TYPES = [
   },
   {
     code: 'BC',
-    name: 'Sangue Cordonale',
+    name: 'Bicomponente',
     icon: Layers,
     gradient: 'from-violet-500 to-purple-700',
     lightBg: 'bg-violet-50 dark:bg-violet-950/30',
     border: 'border-violet-200 dark:border-violet-800',
-    tip: 'Sapevi che il sangue del cordone ombelicale contiene cellule staminali ematopoietiche capaci di ricostituire l\'intero sistema immunitario? È raccolta al momento del parto, senza alcun rischio per madre e bambino.',
-    interval: 'Una tantum (al parto)',
-    duration: 'Raccolta al parto',
+    tip: 'Sapevi che la donazione bicomponente permette di raccogliere due emocomponenti diversi — come globuli rossi e plasma — in una sola seduta? Grazie all\'aferesi, i componenti non necessari vengono reinfusi al donatore durante il prelievo, massimizzando l\'utilità di ogni donazione.',
+    interval: 'Ogni 90 giorni',
+    duration: '60–90 min',
   },
 ]
 
@@ -155,9 +156,15 @@ function Navbar() {
           <span className="font-bold text-lg tracking-tight">B-Link</span>
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-          <a href="#perche" className="hover:text-foreground transition-colors">Perché B-Link</a>
-          <a href="#tipologie" className="hover:text-foreground transition-colors">Tipologie</a>
-          <a href="#come-funziona" className="hover:text-foreground transition-colors">Come funziona</a>
+          {[['perche', 'Perché B-Link'], ['tipologie', 'Tipologie'], ['come-funziona', 'Come funziona']].map(([id, label]) => (
+            <button
+              key={id}
+              onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })}
+              className="hover:text-foreground transition-colors cursor-pointer"
+            >
+              {label}
+            </button>
+          ))}
         </nav>
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
@@ -172,48 +179,106 @@ function Navbar() {
   )
 }
 
-function DonationCard({ type, index }: { type: typeof DONATION_TYPES[0]; index: number }) {
-  const [open, setOpen] = useState(false)
-  const Icon = type.icon
+function DonationCards() {
+  const [active, setActive] = useState(0)
 
   return (
-    <div
-      className={`group relative rounded-2xl border ${type.border} ${type.lightBg} p-6 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1`}
-      onClick={() => setOpen(!open)}
-      style={{ animationDelay: `${index * 100}ms` }}
-    >
-      {/* Badge tipo */}
-      <div className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${type.gradient} px-3 py-1 mb-4`}>
-        <Icon className="h-3.5 w-3.5 text-white" />
-        <span className="text-xs font-semibold text-white uppercase tracking-wide">{type.code}</span>
-      </div>
+    <div className="flex gap-3" style={{ height: '460px' }}>
+      {DONATION_TYPES.map((type, i) => {
+        const isActive = active === i
+        const Icon = type.icon
 
-      <h3 className="text-lg font-bold mb-1">{type.name}</h3>
+        return (
+          <div
+            key={type.code}
+            onMouseEnter={() => setActive(i)}
+            className="relative rounded-2xl overflow-hidden cursor-pointer"
+            style={{
+              flex: isActive ? 3 : 1,
+              transition: 'flex 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
+              minWidth: 0,
+            }}
+          >
+            {/* Sfondo gradiente */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${type.gradient}`} />
 
-      <div className="flex flex-wrap gap-3 mb-4 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          {type.duration}
-        </span>
-        <span className="flex items-center gap-1">
-          <CalendarCheck className="h-3 w-3" />
-          {type.interval}
-        </span>
-      </div>
+            {/* Overlay scuro quando collassata */}
+            <div
+              className="absolute inset-0 bg-black"
+              style={{
+                opacity: isActive ? 0 : 0.45,
+                transition: 'opacity 0.7s ease',
+              }}
+            />
 
-      {/* Tip toggle */}
-      <div className={`overflow-hidden transition-all duration-300 ${open ? 'max-h-40' : 'max-h-0'}`}>
-        <div className="flex gap-2 pt-3 border-t border-current/10">
-          <Lightbulb className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" />
-          <p className="text-sm leading-relaxed text-muted-foreground">{type.tip}</p>
-        </div>
-      </div>
+            {/* Icona — al centro se collassata, in alto a sinistra se espansa */}
+            <div
+              className="absolute"
+              style={{
+                top: isActive ? '1.5rem' : '50%',
+                left: isActive ? '1.5rem' : '50%',
+                transform: isActive ? 'none' : 'translate(-50%, -50%)',
+                transition: 'top 0.7s cubic-bezier(0.4,0,0.2,1), left 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)',
+              }}
+            >
+              <div className="bg-white/25 rounded-xl p-3">
+                <Icon className="h-6 w-6 text-white" />
+              </div>
+            </div>
 
-      <div className={`flex items-center gap-1 text-xs font-medium mt-3 transition-colors ${open ? 'text-muted-foreground' : 'text-primary'}`}>
-        <Lightbulb className="h-3.5 w-3.5" />
-        {open ? 'Nascondi' : 'Sapevi che...'}
-        <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
-      </div>
+            {/* Nome verticale — visibile solo quando collassata */}
+            <div
+              className="absolute bottom-6 left-0 right-0 flex justify-start pl-5"
+              style={{
+                opacity: isActive ? 0 : 1,
+                transition: 'opacity 0.4s ease',
+                transitionDelay: isActive ? '0ms' : '200ms',
+              }}
+            >
+              <span
+                className="text-white font-black text-base tracking-widest whitespace-nowrap"
+                style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+              >
+                {type.name}
+              </span>
+            </div>
+
+            {/* Contenuto espanso — visibile solo quando attiva */}
+            <div
+              className="absolute bottom-0 left-0 right-0 p-6"
+              style={{
+                opacity: isActive ? 1 : 0,
+                transform: isActive ? 'translateY(0)' : 'translateY(12px)',
+                transition: 'opacity 0.5s ease, transform 0.5s ease',
+                transitionDelay: isActive ? '250ms' : '0ms',
+              }}
+            >
+              {/* Badge codice */}
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 mb-3">
+                <span className="text-xs font-bold text-white uppercase tracking-wide">{type.code}</span>
+              </div>
+
+              <h3 className="text-xl font-bold text-white mb-2">{type.name}</h3>
+
+              <div className="flex flex-wrap gap-3 mb-4 text-xs text-white/70">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3 shrink-0" />
+                  {type.duration}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <CalendarCheck className="h-3 w-3 shrink-0" />
+                  {type.interval}
+                </span>
+              </div>
+
+              <div className="flex gap-2 pt-3 border-t border-white/20">
+                <Lightbulb className="h-4 w-4 shrink-0 mt-0.5 text-amber-300" />
+                <p className="text-sm leading-relaxed text-white/85">{type.tip}</p>
+              </div>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -223,28 +288,41 @@ function DonationCard({ type, index }: { type: typeof DONATION_TYPES[0]; index: 
 export default function LandingPage() {
   const router = useRouter()
   const { isAuthenticated, isHydrated, user } = useAuthStore()
-  const heroRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!isHydrated) return
     if (isAuthenticated && user?.role) {
       router.replace(ROLE_REDIRECT[user.role])
+      return
     }
-  }, [isHydrated, isAuthenticated, user, router])
 
-  const scrollToContent = () => {
-    heroRef.current?.nextElementSibling?.scrollIntoView({ behavior: 'smooth' })
-  }
+    // Tenta un ripristino silenzioso della sessione dal cookie refreshToken.
+    // Se l'utente ha un token valido viene reindirizzato alla dashboard;
+    // se il token è scaduto viene fatto il logout per pulire il cookie stantio
+    // (che altrimenti blocca la navigazione verso /auth/login).
+    refreshClient.post<{ accessToken: string }>('/auth/refresh')
+      .then(async ({ data }) => {
+        useAuthStore.getState().setAccessToken(data.accessToken)
+        const { data: me } = await refreshClient.get<AuthMeResponse>('/auth/me', {
+          headers: { Authorization: `Bearer ${data.accessToken}` },
+        })
+        useAuthStore.getState().setUser(me)
+        router.replace(ROLE_REDIRECT[me.role as keyof typeof ROLE_REDIRECT])
+      })
+      .catch(async (err) => {
+        if (err?.response?.status === 401) {
+          try { await refreshClient.post('/auth/logout') } catch { }
+        }
+      })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHydrated])
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
       {/* ── HERO ──────────────────────────────────────────────────────────────── */}
-      <section
-        ref={heroRef}
-        className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-16 overflow-hidden"
-      >
+      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-16 overflow-hidden">
         {/* Sfondo decorativo */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary/5 blur-3xl" />
@@ -301,14 +379,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <button
-          onClick={scrollToContent}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors animate-bounce"
-        >
-          <span>Scopri di più</span>
-          <ChevronDown className="h-4 w-4" />
-        </button>
       </section>
 
       {/* ── STATS ─────────────────────────────────────────────────────────────── */}
@@ -386,9 +456,6 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Button className="mt-auto" asChild>
-                <Link href="/auth/login">Accedi come staff</Link>
-              </Button>
             </div>
 
             {/* Medico */}
@@ -408,9 +475,6 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Button className="mt-auto" variant="outline" asChild>
-                <Link href="/auth/login">Accedi come medico</Link>
-              </Button>
             </div>
           </div>
         </div>
@@ -427,16 +491,11 @@ export default function LandingPage() {
               sono uguali
             </h2>
             <p className="max-w-xl mx-auto text-lg text-muted-foreground">
-              Ogni tipologia ha caratteristiche diverse. Clicca su una card per scoprire
-              curiosità e informazioni utili sulla donazione che ti interessa.
+              Ogni tipologia ha caratteristiche e requisiti diversi. Scopri curiosità e informazioni utili su ciascuna.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {DONATION_TYPES.map((type, i) => (
-              <DonationCard key={type.code} type={type} index={i} />
-            ))}
-          </div>
+          <DonationCards />
 
           <p className="text-center text-xs text-muted-foreground mt-8">
             I requisiti di idoneità variano per tipologia e profilo del donatore. B-Link verifica automaticamente la tua idoneità al momento della prenotazione.

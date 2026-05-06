@@ -7,7 +7,7 @@ interface RetryableRequest extends InternalAxiosRequestConfig {
 }
 
 // Istanza separata per il refresh - senza interceptor per evitare loop
-const refreshClient = axios.create({
+export const refreshClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
 })
