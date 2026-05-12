@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 
 import { apiClient } from '@/lib/api/axios'
-import type { AnamnesisQuestion, Booking } from '@/lib/types'
+import type { AnamnesisQuestion, BiologicalSex, Booking, DonorProfile } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -22,8 +22,15 @@ async function fetchBooking(id: string): Promise<Booking> {
   return data
 }
 
-async function fetchQuestions(): Promise<AnamnesisQuestion[]> {
-  const { data } = await apiClient.get<AnamnesisQuestion[]>('/anamnesis/questions')
+async function fetchProfile(): Promise<DonorProfile> {
+  const { data } = await apiClient.get<DonorProfile>('/donors/profile')
+  return data
+}
+
+async function fetchQuestions(biologicalSex: BiologicalSex): Promise<AnamnesisQuestion[]> {
+  const { data } = await apiClient.get<AnamnesisQuestion[]>('/anamnesis/questions', {
+    params: { biologicalSex },
+  })
   return data
 }
 
@@ -42,12 +49,18 @@ export default function AnamnesisPage() {
     queryFn: () => fetchBooking(id),
   })
 
-  const { data: questions, isLoading: questionsLoading } = useQuery({
-    queryKey: ['anamnesis', 'questions'],
-    queryFn: fetchQuestions,
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ['donor', 'profile'],
+    queryFn: fetchProfile,
   })
 
-  const isLoading = bookingLoading || questionsLoading
+  const { data: questions, isLoading: questionsLoading } = useQuery({
+    queryKey: ['anamnesis', 'questions', profile?.biologicalSex],
+    queryFn: () => fetchQuestions(profile!.biologicalSex),
+    enabled: !!profile,
+  })
+
+  const isLoading = bookingLoading || profileLoading || questionsLoading
 
   // ── Submit ─────────────────────────────────────────────────────────────────
 
@@ -93,7 +106,7 @@ export default function AnamnesisPage() {
     )
   }
 
-  if (!booking || !questions) {
+  if (!booking || !questions || !profile) {
     return (
       <div className="flex flex-col gap-4">
         <p className="text-sm text-destructive">Impossibile caricare il questionario.</p>
@@ -113,6 +126,8 @@ export default function AnamnesisPage() {
   if (alreadyCompiled) {
     const form = booking.anamnesisForm!
     const answerMap = Object.fromEntries(form.answers.map((a) => [a.questionCode, a.answer]))
+    // Mostra solo le domande che il donatore ha effettivamente ricevuto e compilato
+    const compiledQuestions = activeQuestions.filter((q) => q.code in answerMap)
 
     return (
       <div className="flex flex-col gap-6 w-full">
@@ -131,8 +146,8 @@ export default function AnamnesisPage() {
         </div>
 
         <div className="flex flex-col gap-3">
-          {activeQuestions.map((q) => {
-            const answer = answerMap[q.code] ?? false
+          {compiledQuestions.map((q) => {
+            const answer = answerMap[q.code]
             return (
               <div
                 key={q.code}

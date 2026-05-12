@@ -134,7 +134,7 @@ export default function BookingDetailPage() {
 
       {/* Azioni */}
       {canCancel && (
-        <BookingActions bookingId={id} hasAnamnesis={hasAnamnesis} />
+        <BookingActions bookingId={id} hasAnamnesis={hasAnamnesis} slotDate={booking.slot!.date} />
       )}
       {!canCancel && canViewAnamnesis && (
         <Button asChild size="lg" variant="outline" className="w-fit">

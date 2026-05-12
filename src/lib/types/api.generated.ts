@@ -1465,6 +1465,10 @@ export interface components {
              * @example null
              */
             deletedAt: string | null;
+            /** @description Donazioni completate nell'anno solare corrente (tutti i tipi). */
+            completedDonationsThisYear: number;
+            /** @description Massimo donazioni SI consentite per anno (basato su sesso biologico ed età). */
+            maxDonationsPerYear: number;
         };
         StaffProfileResponseDto: {
             /** @example clxyz123 */
@@ -1581,6 +1585,8 @@ export interface components {
             phone: string;
             /** @example centro.milano@blink.it */
             email: string;
+            /** @example notifiche.milano@blink.it */
+            notificationEmail: string | null;
             /** @example 45.464664 */
             latitude: number | null;
             /** @example 9.18854 */
@@ -1730,6 +1736,8 @@ export interface components {
             phone: string;
             /** Format: email */
             email: string;
+            /** Format: email */
+            notificationEmail: string;
             latitude?: number;
             longitude?: number;
         };
@@ -1740,6 +1748,8 @@ export interface components {
             phone?: string;
             /** Format: email */
             email?: string;
+            /** Format: email */
+            notificationEmail?: string;
             latitude?: number | null;
             longitude?: number | null;
             isActive?: boolean;

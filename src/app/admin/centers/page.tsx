@@ -57,6 +57,7 @@ const centerSchema = z.object({
   address: z.string().min(5).max(300),
   phone: z.string().min(5).max(30),
   email: z.string().email('Email non valida'),
+  notificationEmail: z.string().email('Email notifiche non valida'),
   latitude: z.number().min(-90).max(90).optional(),
   longitude: z.number().min(-180).max(180).optional(),
 })
@@ -99,6 +100,7 @@ function CenterDialog({
       address: center?.address ?? '',
       phone: center?.phone ?? '',
       email: center?.email ?? '',
+      notificationEmail: center?.notificationEmail ?? '',
       latitude: center?.latitude ?? undefined,
       longitude: center?.longitude ?? undefined,
     },
@@ -170,7 +172,7 @@ function CenterDialog({
                 <FieldError errors={[errors.phone]} />
               </Field>
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email">Email pubblica</FieldLabel>
                 <Input
                   id="email"
                   type="email"
@@ -179,6 +181,17 @@ function CenterDialog({
                   {...register('email')}
                 />
                 <FieldError errors={[errors.email]} />
+              </Field>
+              <Field className="col-span-2">
+                <FieldLabel htmlFor="notificationEmail">Email notifiche prenotazioni</FieldLabel>
+                <Input
+                  id="notificationEmail"
+                  type="email"
+                  placeholder="notifiche@blink.it"
+                  aria-invalid={!!errors.notificationEmail}
+                  {...register('notificationEmail')}
+                />
+                <FieldError errors={[errors.notificationEmail]} />
               </Field>
               <Field>
                 <FieldLabel htmlFor="latitude">Latitudine (opz.)</FieldLabel>

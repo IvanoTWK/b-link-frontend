@@ -20,14 +20,23 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 
+const ANAMNESIS_WINDOW_DAYS = 7
+
 interface BookingActionsProps {
   bookingId: string
   hasAnamnesis: boolean
+  slotDate: string // ISO date string
 }
 
-export function BookingActions({ bookingId, hasAnamnesis }: BookingActionsProps) {
+export function BookingActions({ bookingId, hasAnamnesis, slotDate }: BookingActionsProps) {
   const queryClient = useQueryClient()
   const [cancelling, setCancelling] = useState(false)
+
+  const daysUntilSlot = Math.floor(
+    (new Date(slotDate).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) /
+      (1000 * 60 * 60 * 24),
+  )
+  const withinWindow = daysUntilSlot <= ANAMNESIS_WINDOW_DAYS
 
   const handleCancel = async () => {
     setCancelling(true)
@@ -48,13 +57,34 @@ export function BookingActions({ bookingId, hasAnamnesis }: BookingActionsProps)
   }
 
   return (
-    <div className="flex gap-3 flex-wrap">
-      <Button asChild size="lg" variant="outline" disabled={cancelling}>
-        <Link href={`/donors/bookings/${bookingId}/anamnesis`}>
-          <ClipboardList className="h-4 w-4 mr-2" />
-          {hasAnamnesis ? 'Visualizza questionario' : 'Compila questionario'}
-        </Link>
-      </Button>
+    <div className="flex flex-col gap-3">
+      {!hasAnamnesis && (
+        withinWindow ? (
+          <Button asChild size="lg" variant="outline" disabled={cancelling}>
+            <Link href={`/donors/bookings/${bookingId}/anamnesis`}>
+              <ClipboardList className="h-4 w-4 mr-2" />
+              Compila questionario
+            </Link>
+          </Button>
+        ) : (
+          <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3.5">
+            <ClipboardList className="h-4 w-4 text-muted-foreground shrink-0" />
+            <p className="text-sm text-muted-foreground">
+              Il questionario sarà disponibile a partire da {ANAMNESIS_WINDOW_DAYS} giorni prima della donazione
+              {daysUntilSlot > 0 ? ` (mancano ${daysUntilSlot} giorni)` : ''}.
+            </p>
+          </div>
+        )
+      )}
+
+      {hasAnamnesis && (
+        <Button asChild size="lg" variant="outline" disabled={cancelling}>
+          <Link href={`/donors/bookings/${bookingId}/anamnesis`}>
+            <ClipboardList className="h-4 w-4 mr-2" />
+            Visualizza questionario
+          </Link>
+        </Button>
+      )}
 
       <AlertDialog>
         <AlertDialogTrigger asChild>

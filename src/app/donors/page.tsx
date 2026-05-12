@@ -8,7 +8,7 @@ import type { Booking } from '@/lib/types'
 import { BentoGrid } from '@/components/ui/bento-grid'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BookingsTable } from '@/components/donors/bookings/bookings-table'
-import { ProfileCard } from '@/components/donors/dashboard/profile-card'
+import { BadgeBentoCard } from '@/components/donors/dashboard/badge-bento-card'
 import { LastDonationCard } from '@/components/donors/dashboard/last-donation-card'
 import { DonationsCountCard } from '@/components/donors/dashboard/donations-count-card'
 
@@ -45,7 +45,7 @@ export default function DonorsPage() {
 
       {/* Cards */}
       <BentoGrid className="grid-cols-1 md:grid-cols-3 auto-rows-[18rem]">
-        <ProfileCard />
+        <BadgeBentoCard />
         <LastDonationCard />
         <DonationsCountCard />
       </BentoGrid>
