@@ -169,79 +169,23 @@ function DonationCards() {
   const [active, setActive] = useState(0)
 
   return (
-    <div className="flex gap-3" style={{ height: '420px' }}>
-      {DONATION_TYPES.map((type, i) => {
-        const isActive = active === i
-        const Icon = type.icon
-
-        return (
-          <div
-            key={type.code}
-            onMouseEnter={() => setActive(i)}
-            className="relative rounded-2xl overflow-hidden cursor-pointer"
-            style={{
-              flex: isActive ? 3 : 1,
-              transition: 'flex 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-              minWidth: 0,
-            }}
-          >
-            <div className={`absolute inset-0 bg-gradient-to-br ${type.gradient}`} />
-            <div
-              className="absolute inset-0 bg-black"
-              style={{
-                opacity: isActive ? 0 : 0.4,
-                transition: 'opacity 0.6s ease',
-              }}
-            />
-
-            {/* Icona */}
-            <div
-              className="absolute"
-              style={{
-                top: isActive ? '1.5rem' : '50%',
-                left: isActive ? '1.5rem' : '50%',
-                transform: isActive ? 'none' : 'translate(-50%, -50%)',
-                transition: 'all 0.6s cubic-bezier(0.4,0,0.2,1)',
-              }}
-            >
-              <div className="bg-white/20 rounded-xl p-2.5">
-                <Icon className="h-5 w-5 text-white" />
+    <>
+      {/* ── Mobile: grid verticale ───────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-4 md:hidden">
+        {DONATION_TYPES.map((type) => {
+          const Icon = type.icon
+          return (
+            <div key={type.code} className={`relative rounded-2xl overflow-hidden bg-gradient-to-br ${type.gradient} p-6`}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-white/20 rounded-xl p-2.5 shrink-0">
+                  <Icon className="h-5 w-5 text-white" />
+                </div>
+                <span className="inline-flex items-center rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold text-white uppercase tracking-wide">
+                  {type.code}
+                </span>
               </div>
-            </div>
-
-            {/* Nome verticale — solo quando collassata */}
-            <div
-              className="absolute bottom-6 left-0 right-0 flex justify-start pl-4"
-              style={{
-                opacity: isActive ? 0 : 1,
-                transition: 'opacity 0.3s ease',
-                transitionDelay: isActive ? '0ms' : '180ms',
-              }}
-            >
-              <span
-                className="text-white font-bold text-sm tracking-widest whitespace-nowrap"
-                style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
-              >
-                {type.name}
-              </span>
-            </div>
-
-            {/* Contenuto espanso */}
-            <div
-              className="absolute bottom-0 left-0 right-0 p-6"
-              style={{
-                opacity: isActive ? 1 : 0,
-                transform: isActive ? 'translateY(0)' : 'translateY(10px)',
-                transition: 'opacity 0.4s ease, transform 0.4s ease',
-                transitionDelay: isActive ? '200ms' : '0ms',
-              }}
-            >
-              <span className="inline-flex items-center rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold text-white uppercase tracking-wide mb-3">
-                {type.code}
-              </span>
-              <h3 className="text-xl font-bold text-white mb-3">{type.name}</h3>
-
-              <div className="flex flex-wrap gap-3 mb-4">
+              <h3 className="text-lg font-bold text-white mb-2">{type.name}</h3>
+              <div className="flex flex-wrap gap-3 mb-3">
                 <span className="flex items-center gap-1.5 text-xs text-white/70">
                   <Clock className="h-3 w-3 shrink-0" />
                   {type.duration}
@@ -251,16 +195,101 @@ function DonationCards() {
                   {type.interval}
                 </span>
               </div>
-
               <div className="flex gap-2 pt-3 border-t border-white/20">
                 <Lightbulb className="h-4 w-4 shrink-0 mt-0.5 text-amber-300" />
                 <p className="text-sm leading-relaxed text-white/85">{type.tip}</p>
               </div>
             </div>
-          </div>
-        )
-      })}
-    </div>
+          )
+        })}
+      </div>
+
+      {/* ── Desktop: accordion ───────────────────────────────────────────────── */}
+      <div className="hidden md:flex gap-3" style={{ height: '420px' }}>
+        {DONATION_TYPES.map((type, i) => {
+          const isActive = active === i
+          const Icon = type.icon
+
+          return (
+            <div
+              key={type.code}
+              onMouseEnter={() => setActive(i)}
+              className="relative rounded-2xl overflow-hidden cursor-pointer"
+              style={{
+                flex: isActive ? 3 : 1,
+                transition: 'flex 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                minWidth: 0,
+              }}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br ${type.gradient}`} />
+              <div
+                className="absolute inset-0 bg-black"
+                style={{ opacity: isActive ? 0 : 0.4, transition: 'opacity 0.6s ease' }}
+              />
+
+              <div
+                className="absolute"
+                style={{
+                  top: isActive ? '1.5rem' : '50%',
+                  left: isActive ? '1.5rem' : '50%',
+                  transform: isActive ? 'none' : 'translate(-50%, -50%)',
+                  transition: 'all 0.6s cubic-bezier(0.4,0,0.2,1)',
+                }}
+              >
+                <div className="bg-white/20 rounded-xl p-2.5">
+                  <Icon className="h-5 w-5 text-white" />
+                </div>
+              </div>
+
+              <div
+                className="absolute bottom-6 left-0 right-0 flex justify-start pl-4"
+                style={{
+                  opacity: isActive ? 0 : 1,
+                  transition: 'opacity 0.3s ease',
+                  transitionDelay: isActive ? '0ms' : '180ms',
+                }}
+              >
+                <span
+                  className="text-white font-bold text-sm tracking-widest whitespace-nowrap"
+                  style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+                >
+                  {type.name}
+                </span>
+              </div>
+
+              <div
+                className="absolute bottom-0 left-0 right-0 p-6"
+                style={{
+                  opacity: isActive ? 1 : 0,
+                  transform: isActive ? 'translateY(0)' : 'translateY(10px)',
+                  transition: 'opacity 0.4s ease, transform 0.4s ease',
+                  transitionDelay: isActive ? '200ms' : '0ms',
+                }}
+              >
+                <span className="inline-flex items-center rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold text-white uppercase tracking-wide mb-3">
+                  {type.code}
+                </span>
+                <h3 className="text-xl font-bold text-white mb-3">{type.name}</h3>
+                <div className="flex flex-wrap gap-3 mb-4">
+                  <span className="flex items-center gap-1.5 text-xs text-white/70">
+                    <Clock className="h-3 w-3 shrink-0" />
+                    {type.duration}
+                  </span>
+                  <span className="flex items-center gap-1.5 text-xs text-white/70">
+                    <CalendarCheck className="h-3 w-3 shrink-0" />
+                    {type.interval}
+                  </span>
+                </div>
+                <div className="flex gap-2 pt-3 border-t border-white/20">
+                  <Lightbulb className="h-4 w-4 shrink-0 mt-0.5 text-amber-300" />
+                  <p className="text-sm leading-relaxed text-white/85">{type.tip}</p>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </>
   )
 }
 
@@ -358,7 +387,7 @@ export default function LandingPage() {
 
           <div className="grid sm:grid-cols-3 gap-6">
             {BENEFITS.map(({ icon: Icon, title, description }) => (
-              <div key={title} className="bg-white rounded-2xl border border-neutral-200 p-7 flex flex-col gap-4">
+              <div key={title} className="bg-white rounded-2xl border border-neutral-200 p-7 flex flex-col items-center text-center sm:items-start sm:text-left gap-4">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
                   <Icon className="h-5 w-5 text-primary" />
                 </div>
@@ -387,7 +416,7 @@ export default function LandingPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
             {HOW_IT_WORKS.map(({ step, title, description, icon: Icon }) => (
-              <div key={step} className="flex flex-col gap-4">
+              <div key={step} className="flex flex-col items-center text-center sm:items-start sm:text-left gap-4">
                 <div className="relative flex h-13 w-13 items-center justify-center rounded-2xl bg-primary/8">
                   <Icon className="h-6 w-6 text-primary" />
                   <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">
