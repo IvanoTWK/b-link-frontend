@@ -17,6 +17,12 @@ const SEGMENT_LABELS: Record<string, string> = {
   admin: "Admin",
   users: "Utenti",
   profile: "Profilo",
+  centers: "Centri",
+  "donation-types": "Tipi donazione",
+  "exam-parameters": "Parametri lab",
+  anamnesis: "Domande anamnesi",
+  "audit-logs": "Audit log",
+  consensi: "Consensi",
 }
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i

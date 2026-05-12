@@ -25,7 +25,7 @@ function formatTime(iso: string) {
 
 // ── Tipi ───────────────────────────────────────────────────────────────────────
 
-interface DonationWithBooking extends Donation {
+type DonationWithBooking = Omit<Donation, 'booking'> & {
   booking?: {
     id?: string
     status?: string

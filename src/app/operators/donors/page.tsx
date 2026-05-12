@@ -12,7 +12,6 @@ import {
   EMPTY_DONOR_FILTERS,
 } from '@/components/operators/donors/operator-donors-filters'
 import { OperatorDonorsTable } from '@/components/operators/donors/operator-donors-table'
-import { DataTablePagination } from '@/components/ui/data-table-pagination'
 
 // ── Costanti ───────────────────────────────────────────────────────────────────
 
@@ -103,16 +102,6 @@ export default function OperatorDonorsPage() {
         isLoading={isLoading}
       />
 
-      {/* Paginazione */}
-      {(hasPrevious || hasNext) && (
-        <DataTablePagination
-          currentPage={currentPage}
-          hasPrevious={hasPrevious}
-          hasNext={hasNext}
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-        />
-      )}
     </div>
   )
 }

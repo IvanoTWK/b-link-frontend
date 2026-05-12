@@ -1,36 +1,119 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# B-Link — Frontend
 
-## Getting Started
+Frontend Next.js 15 del sistema **B-Link** per la gestione delle donazioni di sangue.  
+Si connette al backend NestJS disponibile nella repo `b-link-backend`.
 
-First, run the development server:
+---
+
+## Avvio con Docker (consigliato)
+
+> Assicurarsi che il backend sia già in esecuzione prima di avviare il frontend.
+
+### 1. Avviare il backend
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd b-link-backend
+docker compose up --build -d
+
+# Solo al primo avvio — seed del database:
+docker exec b-link-backend-api-1 npx prisma db seed
+
+# Solo al primo avvio — abilitare l'estensione pgcrypto:
+docker exec b-link-backend-db-1 sh -c "psql \$POSTGRES_USER -d blink_db -c 'CREATE EXTENSION IF NOT EXISTS pgcrypto;'"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Avviare il frontend
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd b-link-frontend
+cp .env.docker .env        # copia le variabili d'ambiente
+docker compose up --build -d
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### URL di accesso
 
-## Learn More
+| Servizio | URL |
+|---|---|
+| Frontend | http://localhost:3001 |
+| Backend API | http://localhost:3000 |
+| MailHog (email fake) | http://localhost:8025 |
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Avvio in sviluppo (senza Docker)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install
+npm run dev
+```
 
-## Deploy on Vercel
+Aprire [http://localhost:3001](http://localhost:3001).  
+Richede il backend in esecuzione su `http://localhost:3000` (vedi `.env.local`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Accesso alla piattaforma
+
+### Donatore
+
+I donatori possono **registrarsi liberamente** dalla pagina pubblica (`/auth/register`).  
+In alternativa è disponibile un account di test pre-caricato dal seed:
+
+| Campo | Valore |
+|---|---|
+| Email | `luca.bianchi@demo.it` |
+| Password | `Demo1234!` |
+| 2FA | Non richiesto |
+
+> Dopo il login, completare l'onboarding inserendo i dati anagrafici e sanitari se richiesto.
+
+---
+
+### Operatore (Staff)
+
+Gli account operatore sono creati dall'amministratore. Account di test disponibile:
+
+| Campo | Valore |
+|---|---|
+| Email | `op1.roma@blink.it` |
+| Password | `Demo1234!` |
+| 2FA | **Obbligatorio** — al primo accesso verrà richiesto il setup tramite app TOTP (es. Google Authenticator, Authy) |
+
+---
+
+### Medico (Doctor)
+
+| Campo | Valore |
+|---|---|
+| Email | `dr1.roma@blink.it` |
+| Password | `Demo1234!` |
+| 2FA | **Obbligatorio** — al primo accesso verrà richiesto il setup tramite app TOTP |
+
+---
+
+### Amministratore
+
+| Campo | Valore |
+|---|---|
+| Email | `admin@blink.local` |
+| Password | `Admin1234!` |
+| 2FA | **Obbligatorio** — al primo accesso verrà richiesto il setup tramite app TOTP |
+
+---
+
+## Note sul 2FA
+
+Il personale sanitario (operatori, medici, admin) è soggetto a **2FA obbligatorio**.  
+Al primo accesso verrà mostrata una pagina di setup con QR code da scansionare con un'app TOTP.  
+Le email di verifica e reset password vengono recapitate su **MailHog** (`http://localhost:8025`).
+
+---
+
+## Stack tecnico
+
+- **Next.js 15** — App Router, TypeScript, Turbopack
+- **TailwindCSS** + **shadcn/ui** — UI components
+- **TanStack Query** — data fetching e cache
+- **Zustand** — gestione stato autenticazione
+- **React Hook Form** + **Zod** — form e validazione
+- **jsPDF** — generazione PDF referti medici

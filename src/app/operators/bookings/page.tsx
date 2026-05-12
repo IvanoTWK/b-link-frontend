@@ -11,7 +11,6 @@ import {
   OperatorBookingsFilters,
   type BookingFilters,
 } from '@/components/operators/bookings/operator-bookings-filters'
-import { DataTablePagination } from '@/components/ui/data-table-pagination'
 
 // ── Costanti ───────────────────────────────────────────────────────────────────
 
@@ -113,16 +112,6 @@ export default function OperatorBookingsPage() {
         <OperatorBookingsTable bookings={data?.items ?? []} />
       )}
 
-      {/* Paginazione */}
-      {(hasPrevious || hasNext) && (
-        <DataTablePagination
-          currentPage={currentPage}
-          hasPrevious={hasPrevious}
-          hasNext={hasNext}
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-        />
-      )}
     </div>
   )
 }

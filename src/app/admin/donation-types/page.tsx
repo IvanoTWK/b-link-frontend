@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 
 import { apiClient } from '@/lib/api/axios'
 import type { DonationType } from '@/lib/types'
+import { TablePaginator } from '@/components/ui/table-paginator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -635,6 +636,8 @@ export default function AdminDonationTypesPage() {
   const [editType, setEditType] = useState<DonationType | null>(null)
   const [deleteType, setDeleteType] = useState<DonationType | null>(null)
   const [intervalOpen, setIntervalOpen] = useState(false)
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
   const queryClient = useQueryClient()
 
   const { data: types = [], isLoading, isError } = useQuery({
@@ -710,6 +713,7 @@ export default function AdminDonationTypesPage() {
       ) : typesWithIntervals.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nessun tipo donazione trovato.</p>
       ) : (
+        <div className="flex flex-col gap-3">
         <div className="w-full rounded-xl border border-border overflow-hidden">
           <Table>
             <TableHeader>
@@ -723,7 +727,7 @@ export default function AdminDonationTypesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {typesWithIntervals.map((dt) => (
+              {typesWithIntervals.slice(page * pageSize, (page + 1) * pageSize).map((dt) => (
                 <DonationTypeRow
                   key={dt.id}
                   dt={dt}
@@ -734,6 +738,14 @@ export default function AdminDonationTypesPage() {
               ))}
             </TableBody>
           </Table>
+        </div>
+        <TablePaginator
+          page={page}
+          pageSize={pageSize}
+          total={typesWithIntervals.length}
+          onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(0) }}
+        />
         </div>
       )}
 

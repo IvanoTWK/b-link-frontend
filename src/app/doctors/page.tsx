@@ -8,8 +8,8 @@ import { BentoGrid, BentoCard } from '@/components/ui/bento-grid'
 import { Skeleton } from '@/components/ui/skeleton'
 
 async function fetchPendingReportsCount(): Promise<number> {
-  const { data } = await apiClient.get<{ items: unknown[]; nextCursor: string | null }>('/bookings', {
-    params: { status: 'IN_AWAITING_REPORT', limit: 100 },
+  const { data } = await apiClient.get<{ items: unknown[]; nextCursor: string | null }>('/donations', {
+    params: { bookingStatus: 'IN_AWAITING_REPORT', limit: 100 },
   })
   return data.items.length
 }
@@ -17,7 +17,7 @@ async function fetchPendingReportsCount(): Promise<number> {
 async function fetchCompletedTodayCount(): Promise<number> {
   const today = new Date().toISOString().split('T')[0]
   const { data } = await apiClient.get<{ items: unknown[]; nextCursor: string | null }>('/medical/reports', {
-    params: { dateFrom: today, dateTo: today, limit: 100 },
+    params: { dateFrom: today, dateTo: `${today}T23:59:59`, limit: 100 },
   })
   return data.items.length
 }

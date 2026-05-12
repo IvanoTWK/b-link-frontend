@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { apiClient } from '@/lib/api/axios'
 import type { Center } from '@/lib/types'
 import { Button } from '@/components/ui/button'
+import { TablePaginator } from '@/components/ui/table-paginator'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -56,6 +57,7 @@ const centerSchema = z.object({
   address: z.string().min(5).max(300),
   phone: z.string().min(5).max(30),
   email: z.string().email('Email non valida'),
+  notificationEmail: z.string().email('Email notifiche non valida'),
   latitude: z.number().min(-90).max(90).optional(),
   longitude: z.number().min(-180).max(180).optional(),
 })
@@ -98,6 +100,7 @@ function CenterDialog({
       address: center?.address ?? '',
       phone: center?.phone ?? '',
       email: center?.email ?? '',
+      notificationEmail: center?.notificationEmail ?? '',
       latitude: center?.latitude ?? undefined,
       longitude: center?.longitude ?? undefined,
     },
@@ -169,7 +172,7 @@ function CenterDialog({
                 <FieldError errors={[errors.phone]} />
               </Field>
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email">Email pubblica</FieldLabel>
                 <Input
                   id="email"
                   type="email"
@@ -178,6 +181,17 @@ function CenterDialog({
                   {...register('email')}
                 />
                 <FieldError errors={[errors.email]} />
+              </Field>
+              <Field className="col-span-2">
+                <FieldLabel htmlFor="notificationEmail">Email notifiche prenotazioni</FieldLabel>
+                <Input
+                  id="notificationEmail"
+                  type="email"
+                  placeholder="notifiche@blink.it"
+                  aria-invalid={!!errors.notificationEmail}
+                  {...register('notificationEmail')}
+                />
+                <FieldError errors={[errors.notificationEmail]} />
               </Field>
               <Field>
                 <FieldLabel htmlFor="latitude">Latitudine (opz.)</FieldLabel>
@@ -225,6 +239,8 @@ export default function AdminCentersPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [editCenter, setEditCenter] = useState<Center | null>(null)
   const [deleteCenter, setDeleteCenter] = useState<Center | null>(null)
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
   const queryClient = useQueryClient()
 
   const { data, isLoading, isError } = useQuery({
@@ -278,6 +294,7 @@ export default function AdminCentersPage() {
       ) : centers.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nessun centro trovato.</p>
       ) : (
+        <div className="flex flex-col gap-3">
         <div className="w-full rounded-xl border border-border overflow-hidden">
           <Table>
             <TableHeader>
@@ -291,7 +308,7 @@ export default function AdminCentersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {centers.map((c) => (
+              {centers.slice(page * pageSize, (page + 1) * pageSize).map((c) => (
                 <TableRow key={c.id}>
                   <TableCell className="pl-5 py-3">
                     <span className="text-sm font-semibold">{c.name}</span>
@@ -336,6 +353,14 @@ export default function AdminCentersPage() {
               ))}
             </TableBody>
           </Table>
+        </div>
+        <TablePaginator
+          page={page}
+          pageSize={pageSize}
+          total={centers.length}
+          onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(0) }}
+        />
         </div>
       )}
 

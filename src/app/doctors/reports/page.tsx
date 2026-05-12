@@ -1,17 +1,13 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import { apiClient } from '@/lib/api/axios'
 import type { Donation } from '@/lib/types'
 import { Skeleton } from '@/components/ui/skeleton'
-import { DataTablePagination } from '@/components/ui/data-table-pagination'
+import { TablePaginator } from '@/components/ui/table-paginator'
 import { DoctorPendingReportsTable } from '@/components/doctors/reports/doctor-pending-reports-table'
-
-// ── Costanti ───────────────────────────────────────────────────────────────────
-
-const PAGE_LIMIT = 20
 
 // ── Tipi ───────────────────────────────────────────────────────────────────────
 
@@ -22,42 +18,25 @@ interface PaginatedDonations {
 
 // ── Fetch ───────────────────────────────────────────────────────────────────────
 
-async function fetchPendingDonations(cursor: string | null): Promise<PaginatedDonations> {
-  const params: Record<string, string | number> = {
-    bookingStatus: 'IN_AWAITING_REPORT',
-    limit: PAGE_LIMIT,
-  }
-  if (cursor) params.cursor = cursor
-
-  const { data } = await apiClient.get<PaginatedDonations>('/donations', { params })
-  return data
+async function fetchPendingDonations(): Promise<Donation[]> {
+  const { data } = await apiClient.get<PaginatedDonations>('/donations', {
+    params: { bookingStatus: 'IN_AWAITING_REPORT', limit: 200 },
+  })
+  return data.items
 }
 
 // ── Pagina ─────────────────────────────────────────────────────────────────────
 
 export default function DoctorReportsPage() {
-  const [cursorStack, setCursorStack] = useState<(string | null)[]>([null])
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
 
-  const currentCursor = cursorStack[cursorStack.length - 1]
-  const currentPage = cursorStack.length
-
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['doctor', 'donations', currentCursor],
-    queryFn: () => fetchPendingDonations(currentCursor),
+  const { data: allDonations = [], isLoading, isError } = useQuery({
+    queryKey: ['doctor', 'donations', 'pending'],
+    queryFn: fetchPendingDonations,
   })
 
-  const handleNext = useCallback(() => {
-    if (data?.nextCursor) {
-      setCursorStack((prev) => [...prev, data.nextCursor])
-    }
-  }, [data?.nextCursor])
-
-  const handlePrevious = useCallback(() => {
-    setCursorStack((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev))
-  }, [])
-
-  const hasPrevious = currentPage > 1
-  const hasNext = !!data?.nextCursor
+  const paged = allDonations.slice(page * pageSize, (page + 1) * pageSize)
 
   return (
     <div className="flex flex-col gap-6 min-h-[calc(100dvh-6.5rem)]">
@@ -76,7 +55,7 @@ export default function DoctorReportsPage() {
         </p>
       )}
 
-      {/* Tabella */}
+      {/* Lista */}
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -84,17 +63,17 @@ export default function DoctorReportsPage() {
           ))}
         </div>
       ) : (
-        <DoctorPendingReportsTable donations={(data?.items ?? []) as Parameters<typeof DoctorPendingReportsTable>[0]['donations']} />
+        <DoctorPendingReportsTable donations={paged as Parameters<typeof DoctorPendingReportsTable>[0]['donations']} />
       )}
 
       {/* Paginazione */}
-      {(hasPrevious || hasNext) && (
-        <DataTablePagination
-          currentPage={currentPage}
-          hasPrevious={hasPrevious}
-          hasNext={hasNext}
-          onPrevious={handlePrevious}
-          onNext={handleNext}
+      {!isLoading && allDonations.length > 0 && (
+        <TablePaginator
+          page={page}
+          pageSize={pageSize}
+          total={allDonations.length}
+          onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(0) }}
         />
       )}
     </div>

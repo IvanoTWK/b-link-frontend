@@ -74,13 +74,14 @@ export type TwoFactorSetupResponse = components['schemas']['TwoFactorSetupRespon
 export type TwoFactorActivateResponse = components['schemas']['TwoFactorActivateResponseDto']
 
 // ─── Entity types ─────────────────────────────────────────────────────────────
-export type DonorProfile = components['schemas']['DonorProfileResponseDto']
+export type DonorProfile = components['schemas']['DonorProfileResponseDto'] & { email?: string | null }
 export type StaffProfile = components['schemas']['StaffProfileResponseDto']
 export type Center = components['schemas']['CenterResponseDto']
 export type DonationType = components['schemas']['DonationTypeResponseDto']
 export type Slot = components['schemas']['SlotResponseDto']
 export type Booking = components['schemas']['BookingResponseDto'] & {
   donor?: {
+    email?: string | null
     donorProfile?: {
       firstName: string | null
       lastName: string | null

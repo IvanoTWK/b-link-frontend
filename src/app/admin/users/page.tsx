@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
 import { apiClient } from '@/lib/api/axios'
 import type { AdminUser } from '@/lib/types'
@@ -12,11 +12,7 @@ import {
 } from '@/components/admin/users/users-filters'
 import { UsersTable } from '@/components/admin/users/users-table'
 import { CreateStaffUserDialog } from '@/components/admin/users/create-staff-user-dialog'
-import { Button } from '@/components/ui/button'
-
-// ── Costanti ──────────────────────────────────────────────────────────────────
-
-const PAGE_LIMIT = 20
+import { TablePaginator } from '@/components/ui/table-paginator'
 
 // ── Tipi ──────────────────────────────────────────────────────────────────────
 
@@ -27,18 +23,14 @@ interface PaginatedUsers {
 
 // ── Fetch ──────────────────────────────────────────────────────────────────────
 
-async function fetchUsers(
-  filters: AdminUsersFilters,
-  cursor: string | null,
-): Promise<PaginatedUsers> {
-  const params: Record<string, string | number> = { limit: PAGE_LIMIT }
+async function fetchUsers(filters: AdminUsersFilters): Promise<AdminUser[]> {
+  const params: Record<string, string | number> = { limit: 100 }
   if (filters.role) params.role = filters.role
   if (filters.emailVerified !== null) params.emailVerified = String(filters.emailVerified)
   if (filters.locked !== null) params.locked = String(filters.locked)
-  if (cursor) params.cursor = cursor
 
   const { data } = await apiClient.get<PaginatedUsers>('/admin/users', { params })
-  return data
+  return data.items
 }
 
 // ── Pagina ────────────────────────────────────────────────────────────────────
@@ -46,20 +38,20 @@ async function fetchUsers(
 export default function AdminUsersPage() {
   const [filters, setFilters] = useState<AdminUsersFilters>(EMPTY_USERS_FILTERS)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
 
-  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ['admin', 'users', filters],
-      queryFn: ({ pageParam }) => fetchUsers(filters, pageParam as string | null),
-      initialPageParam: null as string | null,
-      getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    })
+  const { data: allUsers = [], isLoading, isError } = useQuery({
+    queryKey: ['admin', 'users', filters],
+    queryFn: () => fetchUsers(filters),
+  })
 
   const handleFiltersChange = useCallback((next: AdminUsersFilters) => {
     setFilters(next)
+    setPage(0)
   }, [])
 
-  const allUsers = data?.pages.flatMap((p) => p.items) ?? []
+  const paged = allUsers.slice(page * pageSize, (page + 1) * pageSize)
 
   return (
     <div className="flex flex-col gap-6 min-h-[calc(100dvh-6.5rem)]">
@@ -84,20 +76,17 @@ export default function AdminUsersPage() {
       )}
 
       {/* Tabella */}
-      <UsersTable users={allUsers} isLoading={isLoading} />
+      <UsersTable users={paged} isLoading={isLoading} />
 
-      {/* Carica altri */}
-      {hasNextPage && (
-        <div className="flex justify-center pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-          >
-            {isFetchingNextPage ? 'Caricamento...' : 'Carica altri'}
-          </Button>
-        </div>
+      {/* Paginazione */}
+      {!isLoading && allUsers.length > 0 && (
+        <TablePaginator
+          page={page}
+          pageSize={pageSize}
+          total={allUsers.length}
+          onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(0) }}
+        />
       )}
     </div>
   )

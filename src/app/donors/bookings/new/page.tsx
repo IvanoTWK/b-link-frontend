@@ -9,7 +9,6 @@ import dynamic from 'next/dynamic'
 
 import { apiClient } from '@/lib/api/axios'
 import type { Center, DonationType, Slot } from '@/lib/types'
-import { BentoCard, BentoGrid } from '@/components/ui/bento-grid'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -107,23 +106,23 @@ function StepDonationType({
   }> = {
     SI: {
       iconComponent: Droplets,
-      description: 'La donazione più diffusa. Il sangue intero viene separato in componenti — globuli rossi, plasma e piastrine — per aiutare più pazienti con una sola donazione.',
-      gradient: 'from-primary via-primary/70 to-primary/40',
+      description: 'La donazione più diffusa. Globuli rossi, plasma e piastrine aiutano più pazienti con una sola donazione.',
+      gradient: 'from-red-400 via-rose-500 to-pink-700',
     },
     PL: {
       iconComponent: FlaskConical,
-      description: 'Il plasma viene raccolto tramite aferesi e restituito il resto del sangue. Usato per farmaci salvavita, terapie d\'emergenza e pazienti con gravi ustioni.',
-      gradient: 'from-primary/90 via-primary/60 to-primary/30',
+      description: 'Il plasma viene raccolto tramite aferesi. Usato per farmaci salvavita e terapie d\'emergenza.',
+      gradient: 'from-yellow-400 via-amber-500 to-orange-600',
     },
     PT: {
       iconComponent: Microscope,
-      description: 'Le piastrine sono fondamentali per i pazienti oncologici in chemioterapia e per chi soffre di disturbi della coagulazione. La donazione dura circa 90 minuti.',
-      gradient: 'from-primary/80 via-primary/50 to-primary/20',
+      description: 'Fondamentali per i pazienti oncologici in chemioterapia e per i disturbi della coagulazione.',
+      gradient: 'from-cyan-400 via-blue-500 to-indigo-700',
     },
     BC: {
       iconComponent: Layers,
-      description: 'In un\'unica seduta vengono raccolti sia plasma che piastrine tramite aferesi avanzata. Massimizza l\'impatto della donazione riducendo il numero di accessi al centro.',
-      gradient: 'from-primary/70 via-primary/45 to-primary/15',
+      description: 'Plasma e piastrine raccolti in un\'unica seduta tramite aferesi avanzata. Massimo impatto.',
+      gradient: 'from-fuchsia-400 via-violet-600 to-purple-800',
     },
   }
 
@@ -131,11 +130,16 @@ function StepDonationType({
 
   if (isLoading) {
     return (
-      <BentoGrid className="grid-cols-1 md:grid-cols-2 auto-rows-[20rem]">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="col-span-1 rounded-xl h-full" />
-        ))}
-      </BentoGrid>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-sm font-medium">Seleziona il tipo di donazione</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-52 rounded-xl" />
+          ))}
+        </div>
+      </div>
     )
   }
 
@@ -144,64 +148,53 @@ function StepDonationType({
       <div className="flex flex-col gap-1">
         <h2 className="text-sm font-medium">Seleziona il tipo di donazione</h2>
         <p className="text-sm text-muted-foreground">
-          Scegli la tipologia più adatta a te. Verificheremo automaticamente la tua idoneità in base alla storia donazioni prima di confermare.
+          Scegli la tipologia più adatta a te. Verificheremo automaticamente la tua idoneità prima di confermare.
         </p>
       </div>
 
-      <BentoGrid className="grid-cols-1 md:grid-cols-2 auto-rows-[20rem] mt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {data?.slice().reverse().map((type) => {
           const config = TYPE_CONFIG[type.code] ?? fallback
           const IconComp = config.iconComponent
           const isSelected = selected?.id === type.id
+
           return (
             <div
               key={type.id}
               onClick={() => onSelect(type)}
-              className={`group relative col-span-1 flex flex-col justify-end overflow-hidden rounded-xl cursor-pointer transform-gpu bg-gradient-to-br ${config.gradient}${isSelected ? ' ring-2 ring-white/80' : ''}`}
+              className={`relative rounded-xl cursor-pointer overflow-hidden transition-all duration-200 bg-gradient-to-br ${config.gradient}
+                ${isSelected ? 'ring-2 ring-white/80 ring-offset-2 ring-offset-background' : 'hover:brightness-110'}`}
             >
-              {/* Icona decorativa grande in background */}
-              <div className="absolute -right-8 -top-6 opacity-20 pointer-events-none">
-                <IconComp className="h-48 w-48 text-white" />
-              </div>
-
-              {/* Check selezione */}
-              {isSelected && (
-                <div className="absolute top-4 right-4 z-30">
-                  <Check className="h-7 w-7 text-white drop-shadow" />
+              <div className="p-5 flex flex-col justify-between min-h-[200px]">
+                {/* Header: icona + check */}
+                <div className="flex items-start justify-between">
+                  <div className="bg-white/20 rounded-xl p-2.5">
+                    <IconComp className="h-5 w-5 text-white" />
+                  </div>
+                  {isSelected && (
+                    <div className="bg-white/30 rounded-full p-1">
+                      <Check className="h-4 w-4 text-white" />
+                    </div>
+                  )}
                 </div>
-              )}
 
-              {/* Strip inferiore — stesso pattern di BentoCard */}
-              <div className="p-4">
-                <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 transition-all duration-300 lg:group-hover:-translate-y-10">
-                  <IconComp className="h-12 w-12 origin-left transform-gpu text-white transition-all duration-300 ease-in-out group-hover:scale-75" />
-                  <h3 className="text-xl font-semibold text-white">{type.name}</h3>
-                  <p className="max-w-lg text-white/70 text-sm leading-relaxed line-clamp-2">
+                {/* Footer: nome + descrizione */}
+                <div className="flex flex-col gap-1 mt-4">
+                  <p className="text-white/70 text-[10px] font-semibold uppercase tracking-widest">
+                    {type.code}
+                  </p>
+                  <p className="text-white text-base font-bold leading-tight">
+                    {type.name}
+                  </p>
+                  <p className="text-white/70 text-xs leading-relaxed mt-1 line-clamp-3">
                     {config.description}
                   </p>
                 </div>
-
-                {/* CTA mobile */}
-                <div className="pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:hidden">
-                  <span className="text-white/80 text-sm font-medium flex items-center gap-1 pt-1">
-                    Seleziona
-                  </span>
-                </div>
               </div>
-
-              {/* CTA desktop — appare da sotto all'hover */}
-              <div className="pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:flex">
-                <span className="text-white text-sm font-semibold">
-                  Seleziona →
-                </span>
-              </div>
-
-              {/* Overlay hover */}
-              <div className="pointer-events-none absolute inset-0 transform-gpu transition-all duration-300 group-hover:bg-white/5" />
             </div>
           )
         })}
-      </BentoGrid>
+      </div>
     </div>
   )
 }

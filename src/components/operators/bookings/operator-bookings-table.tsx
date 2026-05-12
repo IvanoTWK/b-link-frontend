@@ -1,9 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
+  getPaginationRowModel,
   flexRender,
   createColumnHelper,
 } from '@tanstack/react-table'
@@ -11,6 +13,7 @@ import { CalendarDays, ChevronRight, Droplets, Info, Phone, User } from 'lucide-
 
 import type { Booking } from '@/lib/types'
 import { Button } from '@/components/ui/button'
+import { TablePaginator } from '@/components/ui/table-paginator'
 import {
   Table,
   TableBody,
@@ -27,6 +30,28 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
+
+// ── Badge tipologia ───────────────────────────────────────────────────────────
+
+const TYPE_GRADIENT: Record<string, string> = {
+  SI: 'from-red-400 via-rose-500 to-pink-700',
+  PL: 'from-yellow-400 via-amber-500 to-orange-600',
+  PT: 'from-cyan-400 via-blue-500 to-indigo-700',
+  BC: 'from-fuchsia-400 via-violet-600 to-purple-800',
+}
+
+function DonationTypeBadge({ code, name }: { code?: string | null; name?: string | null }) {
+  const gradient = code ? (TYPE_GRADIENT[code] ?? null) : null
+  if (!name) return <span className="text-sm text-muted-foreground">—</span>
+  if (!gradient) return <span className="text-sm">{name}</span>
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold text-white bg-gradient-to-r ${gradient}`}
+    >
+      {code}
+    </span>
+  )
+}
 
 // ── Stato ─────────────────────────────────────────────────────────────────────
 
@@ -119,12 +144,13 @@ const columns = [
       return <span className="text-sm">{phone}</span>
     },
   }),
-  columnHelper.accessor((row) => row.donationType?.name, {
+  columnHelper.accessor((row) => row.donationType, {
     id: 'tipo',
     header: () => <ColHeader icon={Droplets} label="Tipo" />,
-    cell: (info) => (
-      <span className="text-sm">{info.getValue() ?? '—'}</span>
-    ),
+    cell: (info) => {
+      const dt = info.getValue()
+      return <DonationTypeBadge code={dt?.code} name={dt?.name} />
+    },
   }),
   columnHelper.accessor('status', {
     header: () => <ColHeader icon={Info} label="Stato" />,
@@ -152,10 +178,15 @@ interface OperatorBookingsTableProps {
 }
 
 export function OperatorBookingsTable({ bookings }: OperatorBookingsTableProps) {
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
+
   const table = useReactTable({
     data: bookings,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    state: { pagination },
+    onPaginationChange: setPagination,
   })
 
   if (bookings.length === 0) {
@@ -178,31 +209,41 @@ export function OperatorBookingsTable({ bookings }: OperatorBookingsTableProps) 
   }
 
   return (
-    <div className="w-full rounded-xl border border-border overflow-hidden">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="hover:bg-transparent">
-              {headerGroup.headers.map((header, i) => (
-                <TableHead key={header.id} className={i === 0 ? 'pl-5' : ''}>
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
-              {row.getVisibleCells().map((cell, i) => (
-                <TableCell key={cell.id} className={i === 0 ? 'pl-5 py-3' : 'py-3'}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <div className="flex flex-col gap-3">
+      <div className="w-full rounded-xl border border-border overflow-hidden">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
+                {headerGroup.headers.map((header, i) => (
+                  <TableHead key={header.id} className={i === 0 ? 'pl-5' : ''}>
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell, i) => (
+                  <TableCell key={cell.id} className={i === 0 ? 'pl-5 py-3' : 'py-3'}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <TablePaginator
+        page={table.getState().pagination.pageIndex}
+        pageSize={table.getState().pagination.pageSize}
+        total={bookings.length}
+        onPageChange={(p) => table.setPageIndex(p)}
+        onPageSizeChange={(s) => { table.setPageSize(s); table.setPageIndex(0) }}
+      />
     </div>
   )
 }

@@ -18,17 +18,26 @@ interface SlotOccupancyStat {
   occupancyRate: number
 }
 
+interface StaffProfile {
+  center: { id: string; name: string; city: string; address: string } | null
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getToday(): string {
   return new Date().toISOString().split('T')[0]
 }
 
-async function fetchSlotOccupancy(): Promise<SlotOccupancyStat[]> {
+async function fetchCenterId(): Promise<string | null> {
+  const { data } = await apiClient.get<StaffProfile>('/staff/profile')
+  return data.center?.id ?? null
+}
+
+async function fetchSlotOccupancy(centerId: string | null): Promise<SlotOccupancyStat[]> {
   const today = getToday()
-  const { data } = await apiClient.get<SlotOccupancyStat[]>('/stats/slots', {
-    params: { dateFrom: today, dateTo: today },
-  })
+  const params: Record<string, string> = { dateFrom: today, dateTo: today }
+  if (centerId) params.centerId = centerId
+  const { data } = await apiClient.get<SlotOccupancyStat[]>('/stats/slots', { params })
   return data
 }
 
@@ -47,10 +56,19 @@ function progressColor(rate: number): string {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function SlotOccupancyCard() {
-  const { data: stats = [], isLoading } = useQuery({
-    queryKey: ['operator', 'stats', 'slots', 'today'],
-    queryFn: fetchSlotOccupancy,
+  const { data: centerId, isLoading: isLoadingCenter } = useQuery({
+    queryKey: ['operator', 'staff-profile', 'centerId'],
+    queryFn: fetchCenterId,
+    staleTime: Infinity,
   })
+
+  const { data: stats = [], isLoading: isLoadingStats } = useQuery({
+    queryKey: ['operator', 'stats', 'slots', 'today', centerId],
+    queryFn: () => fetchSlotOccupancy(centerId ?? null),
+    enabled: centerId !== undefined,
+  })
+
+  const isLoading = isLoadingCenter || isLoadingStats
 
   if (isLoading) {
     return <Skeleton className="col-span-1 rounded-xl h-full" />
@@ -88,41 +106,13 @@ export function SlotOccupancyCard() {
               </div>
               <Progress value={globalRate} className={`h-2 ${progressColor(globalRate)}`} />
 
-              {/* Per-center breakdown */}
-              {stats.length > 1 && (
-                <div className="mt-1 flex flex-col gap-1.5">
-                  {stats.map((row) => {
-                    const rate = Math.round(row.occupancyRate)
-                    const centerName = row.center?.name ?? 'Centro sconosciuto'
-                    const available = row.totalCapacity - row.totalBooked
-                    return (
-                      <div key={row.center?.id ?? centerName} className="flex flex-col gap-0.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs truncate max-w-[60%]">{centerName}</span>
-                          <span className="text-xs tabular-nums text-muted-foreground">
-                            {available > 0 ? (
-                              <span className="text-emerald-600 dark:text-emerald-400">{available} liberi</span>
-                            ) : (
-                              <span className="text-red-500 dark:text-red-400">completo</span>
-                            )}
-                          </span>
-                        </div>
-                        <Progress value={rate} className={`h-1 ${progressColor(rate)}`} />
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-
               {/* Single-center: show available count prominently */}
-              {stats.length === 1 && (
-                <div className="flex items-center justify-between mt-1">
-                  <span className="text-xs text-muted-foreground">Posti liberi</span>
-                  <span className="text-xs font-semibold tabular-nums">
-                    {stats[0].totalCapacity - stats[0].totalBooked}
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-xs text-muted-foreground">Posti liberi</span>
+                <span className="text-xs font-semibold tabular-nums">
+                  {totalCapacity - totalBooked}
+                </span>
+              </div>
             </>
           )}
         </div>
