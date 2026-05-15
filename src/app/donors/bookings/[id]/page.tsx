@@ -120,10 +120,14 @@ export default function BookingDetailPage() {
               Ricorda di compilare il questionario anamnestico prima dell&apos;appuntamento.
             </p>
           )}
-          {booking.status === 'CONFIRMED' && hasAnamnesis && (
+          {booking.status === 'CONFIRMED' && hasAnamnesis && booking.anamnesisForm!.reviewStatus === 'PENDING' && (
             <p className="text-sm text-muted-foreground">
-              Questionario compilato il{' '}
-              {new Date(booking.anamnesisForm!.compiledAt).toLocaleDateString('it-IT')}.
+              Questionario compilato — in attesa di revisione medica.
+            </p>
+          )}
+          {booking.status === 'CONFIRMED' && hasAnamnesis && booking.anamnesisForm!.reviewStatus === 'APPROVED' && (
+            <p className="text-sm text-muted-foreground">
+              Questionario approvato dal medico. Sei idoneo alla donazione.
             </p>
           )}
         </div>

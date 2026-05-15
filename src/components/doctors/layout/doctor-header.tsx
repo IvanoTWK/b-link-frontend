@@ -15,6 +15,7 @@ import {
 
 const SEGMENT_LABELS: Record<string, string> = {
   doctors: "Doctors",
+  anamnesis: "Questionari",
   reports: "Referti",
   profile: "Profilo",
   donors: "Donatori",

@@ -1,19 +1,27 @@
 'use client'
 
+import { useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus, Trash2 } from 'lucide-react'
+import { Check, ChevronsUpDown, Plus, Trash2 } from 'lucide-react'
 
+import { cn } from '@/lib/utils/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import {
   Field,
   FieldLabel,
@@ -76,7 +84,77 @@ interface DoctorReportFormProps {
   isPending: boolean
 }
 
-// ── Componente ─────────────────────────────────────────────────────────────────
+// ── Combobox parametro ─────────────────────────────────────────────────────────
+
+function ParameterCombobox({
+  examParameters,
+  value,
+  onSelect,
+}: {
+  examParameters: ExamParameter[]
+  value: string
+  onSelect: (name: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+
+  const selected = examParameters.find((p) => p.name === value)
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal"
+        >
+          <span className="truncate">
+            {selected ? `${selected.name} (${selected.unit})` : 'Seleziona parametro…'}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-[--radix-popover-trigger-width] p-0"
+        align="start"
+        side="bottom"
+        sideOffset={4}
+        avoidCollisions={false}
+      >
+        <Command>
+          <CommandInput placeholder="Cerca parametro…" />
+          <CommandList className="max-h-56 overflow-y-auto">
+            <CommandEmpty>Nessun parametro trovato.</CommandEmpty>
+            <CommandGroup>
+              {examParameters.map((p) => (
+                <CommandItem
+                  key={p.id}
+                  value={p.name}
+                  onSelect={(v) => {
+                    onSelect(v)
+                    setOpen(false)
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      'mr-2 h-4 w-4',
+                      value === p.name ? 'opacity-100' : 'opacity-0',
+                    )}
+                  />
+                  {p.name}
+                  <span className="ml-1 text-muted-foreground">({p.unit})</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+// ── Componente principale ──────────────────────────────────────────────────────
 
 export function DoctorReportForm({
   examParameters,
@@ -106,7 +184,6 @@ export function DoctorReportForm({
     const param = examParameters.find((p) => p.name === paramName)
     if (!param) return
 
-    // Pre-compila unità e range di riferimento in base al sesso biologico
     const refMin =
       biologicalSex === 'FEMALE'
         ? param.refMinFemale
@@ -165,26 +242,14 @@ export function DoctorReportForm({
 
               <CardContent className="p-4 pt-3">
                 <FieldGroup>
-                  {/* Selezione parametro */}
+                  {/* Selezione parametro con ricerca */}
                   <Field>
-                    <FieldLabel htmlFor={`entries.${index}.parameterName`}>
-                      Parametro
-                    </FieldLabel>
-                    <Select
+                    <FieldLabel>Parametro</FieldLabel>
+                    <ParameterCombobox
+                      examParameters={examParameters}
                       value={currentParamName}
-                      onValueChange={(v) => handleParameterSelect(index, v)}
-                    >
-                      <SelectTrigger id={`entries.${index}.parameterName`} className="w-full">
-                        <SelectValue placeholder="Seleziona parametro…" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {examParameters.map((p) => (
-                          <SelectItem key={p.id} value={p.name}>
-                            {p.name} ({p.unit})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      onSelect={(v) => handleParameterSelect(index, v)}
+                    />
                     {errors.entries?.[index]?.parameterName && (
                       <FieldError>
                         {errors.entries[index]!.parameterName!.message}

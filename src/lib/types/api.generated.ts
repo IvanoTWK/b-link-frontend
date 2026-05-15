@@ -1668,6 +1668,14 @@ export interface components {
             formVersion: string;
             /** @example 2024-06-15T08:30:00.000Z */
             compiledAt: string;
+            /** @enum {string} */
+            reviewStatus: "PENDING" | "APPROVED" | "REJECTED";
+            /** @example 2024-06-16T09:00:00.000Z */
+            reviewedAt?: string | null;
+            /** @example clxyz789 */
+            reviewedByDoctorId?: string | null;
+            /** @example Controindicazione rilevata */
+            reviewNote?: string | null;
             answers: components["schemas"]["AnamnesisAnswerResponseDto"][];
         };
         BookingResponseDto: {

@@ -4,7 +4,7 @@ import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { CalendarDays, LayoutDashboard, LogOut, UserRound, Users } from "lucide-react"
+import { CalendarDays, ClipboardList, LayoutDashboard, LogOut, UserRound, Users } from "lucide-react"
 
 import { useAuthStore } from "@/lib/store/auth.store"
 import { apiClient } from "@/lib/api/axios"
@@ -25,6 +25,7 @@ import {
 
 const NAV_ITEMS = [
   { href: "/doctors", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/doctors/anamnesis", label: "Questionari", icon: ClipboardList, exact: false },
   { href: "/doctors/donors", label: "Donatori", icon: Users, exact: false },
   { href: "/doctors/reports", label: "Referti", icon: CalendarDays, exact: false },
   { href: "/doctors/profile", label: "Profilo", icon: UserRound, exact: false },

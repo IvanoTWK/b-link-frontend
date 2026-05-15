@@ -20,12 +20,35 @@ import { toast } from 'sonner'
 import { apiClient } from '@/lib/api/axios'
 import type { Donation, DonorProfile } from '@/lib/types'
 import { generateReportPdf } from '@/lib/utils/generate-report-pdf'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DoctorReportForm, type ExamParameter } from '@/components/doctors/reports/doctor-report-form'
 
-// ── Tipi estesi ────────────────────────────────────────────────────────────────
+// ── Tipi ──────────────────────────────────────────────────────────────────────
+
+interface AnamnesisAnswer {
+  questionCode: string
+  answer: boolean
+}
+
+interface AnamnesisForm {
+  id: string
+  bookingId: string
+  formVersion: string
+  compiledAt: string
+  answers: AnamnesisAnswer[]
+}
+
+interface AnamnesisQuestion {
+  id: string
+  code: string
+  text: string
+  formVersion: string
+  order: number
+  isActive: boolean
+}
 
 type DonationWithBooking = Omit<Donation, 'booking'> & {
   booking?: {
@@ -110,6 +133,24 @@ async function fetchExamParameters(): Promise<ExamParameter[]> {
   return data
 }
 
+async function fetchAnamnesis(bookingId: string): Promise<AnamnesisForm | null> {
+  try {
+    const { data } = await apiClient.get<AnamnesisForm>(`/bookings/${bookingId}/anamnesis`)
+    return data
+  } catch (err: unknown) {
+    const status = (err as { response?: { status?: number } })?.response?.status
+    if (status === 404) return null
+    throw err
+  }
+}
+
+async function fetchAnamnesisQuestions(): Promise<AnamnesisQuestion[]> {
+  const { data } = await apiClient.get<AnamnesisQuestion[]>('/anamnesis/questions', {
+    params: { includeInactive: true },
+  })
+  return data
+}
+
 // ── Pagina ─────────────────────────────────────────────────────────────────────
 
 export default function DoctorReportDetailPage() {
@@ -132,6 +173,21 @@ export default function DoctorReportDetailPage() {
     queryKey: ['doctor', 'exam-parameters'],
     queryFn: fetchExamParameters,
     staleTime: 5 * 60 * 1000, // 5 minuti
+  })
+
+  const bookingId = donation?.booking?.id
+
+  const { data: anamnesisForm, isLoading: loadingAnamnesis } = useQuery({
+    queryKey: ['doctor', 'anamnesis', bookingId],
+    queryFn: () => fetchAnamnesis(bookingId!),
+    enabled: !!bookingId,
+  })
+
+  const { data: anamnesisQuestions = [] } = useQuery({
+    queryKey: ['anamnesis', 'questions', 'all'],
+    queryFn: fetchAnamnesisQuestions,
+    staleTime: 10 * 60 * 1000,
+    enabled: !!bookingId,
   })
 
   // ── Mutation: crea referto ─────────────────────────────────────────────────
@@ -353,6 +409,58 @@ export default function DoctorReportDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Questionario anamnestico */}
+      {!!bookingId && (
+        <Card className="border-border">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2">
+                <ClipboardList className="h-4 w-4 text-muted-foreground" />
+                Questionario anamnestico
+              </CardTitle>
+              {anamnesisForm && (
+                <span className="text-xs text-muted-foreground">
+                  Compilato il{' '}
+                  {new Date(anamnesisForm.compiledAt).toLocaleDateString('it-IT', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </span>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            {loadingAnamnesis ? (
+              <div className="space-y-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            ) : !anamnesisForm ? (
+              <p className="text-sm text-muted-foreground">
+                Il donatore non ha ancora compilato il questionario anamnestico.
+              </p>
+            ) : (
+              anamnesisForm.answers.map((ans) => {
+                const question = anamnesisQuestions.find((q) => q.code === ans.questionCode)
+                return (
+                  <div
+                    key={ans.questionCode}
+                    className="flex items-center justify-between gap-4 rounded-xl border border-border px-4 py-3"
+                  >
+                    <p className="text-sm leading-snug">{question?.text ?? ans.questionCode}</p>
+                    <Badge variant={ans.answer ? 'destructive' : 'secondary'} className="shrink-0">
+                      {ans.answer ? 'Sì' : 'No'}
+                    </Badge>
+                  </div>
+                )
+              })
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Form referto */}
       {canCompile && (
