@@ -1,41 +1,40 @@
 # B-Link — Frontend
 
-B-Link è un sistema per la gestione delle donazioni di sangue sviluppato come project work universitario.
-Questo repository contiene il **frontend**: un'applicazione web costruita con **Next.js 15** che si connette al backend NestJS (`b-link-backend`).
+B-Link è un sistema per la gestione delle donazioni di sangue, sviluppato come project work universitario.  
+Questo repository contiene il **frontend**: un'applicazione web realizzata con **Next.js 15** che si connette al backend NestJS disponibile nella repository `b-link-backend`.
 
 ---
 
-## Cos'è B-Link
+## Descrizione del sistema
 
-B-Link offre un'interfaccia diversa per ogni ruolo:
+L'interfaccia è strutturata in quattro aree distinte, una per ciascun ruolo:
 
-- i **donatori** possono prenotare una donazione, compilare il questionario e scaricare i referti in PDF
-- gli **operatori** gestiscono gli slot e registrano le donazioni al bancone
-- i **medici** compilano i referti e revisionano i questionari pre-donazione
-- gli **amministratori** hanno accesso completo a utenti, centri, parametri e statistiche
+- **Donatore** — prenotazione degli slot, compilazione del questionario anamnestico, visualizzazione e download dei referti in PDF
+- **Operatore** — gestione degli slot disponibili, registrazione delle donazioni, consultazione dei donatori del proprio centro
+- **Medico** — compilazione dei referti medici, revisione dei questionari pre-donazione, ricerca profili donatori
+- **Amministratore** — gestione di utenti, centri, tipi di donazione, parametri di laboratorio, consensi e audit log
 
 ---
 
-## Come avviare il progetto
+## Avvio con Docker
 
-Il frontend dipende dal backend. Avvia prima il backend, poi il frontend.
+Il frontend dipende dal backend. È necessario avviare prima il backend e attendere il completamento del seed, quindi avviare il frontend.
 
 ### Prerequisiti
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installato e avviato
-- La repo `b-link-backend` clonata nella stessa cartella padre (es. `Progetti/b-link-backend` e `Progetti/b-link-frontend`)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installato e in esecuzione
+- Le due repository (`b-link-backend` e `b-link-frontend`) clonate nella stessa cartella
 
-### 1. Avvia il backend
+### 1. Avvio del backend
 
 ```bash
 cd b-link-backend
 cp .env.example .env
+# Inserire i segreti JWT e PHI_ENCRYPTION_KEY nel file .env
 RUN_SEED=true docker compose up --build -d
 ```
 
-Aspetta qualche secondo che il seed finisca (puoi controllare con `docker compose logs -f api`).
-
-### 2. Avvia il frontend
+### 2. Avvio del frontend
 
 ```bash
 cd b-link-frontend
@@ -43,22 +42,33 @@ cp .env.docker .env
 docker compose up --build -d
 ```
 
-### URL
+### Indirizzi
 
 | Servizio | URL |
 |---|---|
 | Frontend | http://localhost:3001 |
 | Backend API | http://localhost:3000 |
-| Swagger (documentazione API) | http://localhost:3000/api |
-| MailHog (email fake) | http://localhost:8025 |
+| Documentazione Swagger | http://localhost:3000/api |
+| MailHog (visualizzazione email) | http://localhost:8025 |
 
 ---
 
-## Come accedere
+## Avvio senza Docker
+
+```bash
+npm install
+npm run dev
+```
+
+Il frontend si avvia su `http://localhost:3001` e richiede il backend in esecuzione su `http://localhost:3000`.
+
+---
+
+## Accesso alla piattaforma
 
 ### Donatore
 
-I donatori possono registrarsi liberamente dalla pagina pubblica. In alternativa usa l'account demo:
+I donatori possono registrarsi autonomamente dalla pagina pubblica. È disponibile anche un account dimostrativo precaricato dal seed:
 
 | Campo | Valore |
 |---|---|
@@ -66,15 +76,13 @@ I donatori possono registrarsi liberamente dalla pagina pubblica. In alternativa
 | Password | `Demo1234!` |
 | 2FA | Non richiesto |
 
-Dopo il primo login potrebbe essere richiesto di completare l'onboarding (dati anagrafici e sanitari).
-
 ### Operatore
 
 | Campo | Valore |
 |---|---|
 | Email | `op1.roma@blink.it` |
 | Password | `Demo1234!` |
-| 2FA | Obbligatorio — al primo accesso scansiona il QR code con Google Authenticator o Authy |
+| 2FA | Obbligatorio — al primo accesso configurare tramite app TOTP (Google Authenticator, Authy o equivalenti) |
 
 ### Medico
 
@@ -82,7 +90,7 @@ Dopo il primo login potrebbe essere richiesto di completare l'onboarding (dati a
 |---|---|
 | Email | `dr1.roma@blink.it` |
 | Password | `Demo1234!` |
-| 2FA | Obbligatorio — al primo accesso scansiona il QR code |
+| 2FA | Obbligatorio — al primo accesso configurare tramite app TOTP |
 
 ### Amministratore
 
@@ -90,23 +98,9 @@ Dopo il primo login potrebbe essere richiesto di completare l'onboarding (dati a
 |---|---|
 | Email | `admin@b-link.it` |
 | Password | `Admin1234!` |
-| 2FA | Obbligatorio — al primo accesso scansiona il QR code |
+| 2FA | Obbligatorio — al primo accesso configurare tramite app TOTP |
 
-> Le email di verifica e reset password vengono recapitate su MailHog (http://localhost:8025), non arrivano nella casella reale.
-
----
-
-## Avvio senza Docker (sviluppo locale)
-
-Se preferisci avviare il frontend direttamente con Node.js:
-
-```bash
-npm install
-npm run dev
-```
-
-Il frontend si avvia su http://localhost:3001 e si aspetta il backend su http://localhost:3000.
-Assicurati che il backend sia in esecuzione prima di avviare il frontend.
+> Le email di sistema (verifica account, reset password, promemoria) non vengono inviate a caselle reali ma sono visibili su **MailHog** — http://localhost:8025
 
 ---
 
@@ -115,27 +109,29 @@ Assicurati che il backend sia in esecuzione prima di avviare il frontend.
 ```
 src/
   app/
-    (auth)/           Pagine di login, registrazione, 2FA, reset password
-    donors/           Area donatore (dashboard, prenotazioni, donazioni, profilo)
-    operators/        Area operatore (slot, prenotazioni, donatori)
-    doctors/          Area medico (referti, questionari, donatori)
-    admin/            Area amministratore (utenti, centri, parametri, GDPR)
+    (auth)/           Pagine di autenticazione (login, registrazione, 2FA, reset password)
+    donors/           Area donatore
+    operators/        Area operatore
+    doctors/          Area medico
+    admin/            Area amministratore
     page.tsx          Landing page pubblica
-  components/         Componenti riusabili per ogni area
+  components/         Componenti UI riutilizzabili per ciascuna area
   lib/
-    api/              Client HTTP (Axios) e funzioni di fetch
-    types/            Tipi generati dall'OpenAPI del backend
-    utils/            Utility (PDF referti, formatters, ecc.)
+    api/              Client HTTP (Axios) con interceptor per il refresh token
+    types/            Tipi TypeScript generati dalla specifica OpenAPI del backend
+    utils/            Utility condivise (generazione PDF, formattatori, ecc.)
   proxy.ts            Middleware Next.js per la gestione dei cookie di autenticazione
 ```
 
 ---
 
-## Stack tecnico
+## Stack tecnologico
 
-- **Next.js 15** — App Router, TypeScript, Turbopack
-- **TailwindCSS** + **shadcn/ui** — componenti UI
-- **TanStack Query** — data fetching e cache
-- **Zustand** — stato autenticazione (access token in memoria, mai in localStorage)
-- **React Hook Form** + **Zod** — form e validazione
-- **jsPDF** — generazione PDF referti medici
+| Componente | Tecnologia |
+|---|---|
+| Framework | Next.js 15 (App Router, TypeScript) |
+| UI | TailwindCSS + shadcn/ui |
+| Data fetching | TanStack Query |
+| Stato autenticazione | Zustand (access token in memoria) |
+| Form e validazione | React Hook Form + Zod |
+| Generazione PDF | jsPDF |
