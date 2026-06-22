@@ -38,7 +38,7 @@ RUN_SEED=true docker compose up --build -d
 
 ```bash
 cd b-link-frontend
-cp .env.docker .env
+cp .env.local.example .env
 docker compose up --build -d
 ```
 
