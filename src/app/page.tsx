@@ -379,13 +379,13 @@ export default function LandingPage() {
             </div>
       
             {/* Colonna destra */}
-            <div className="flex items-center justify-center rounded-2xl shadow-lg overflow-hidden">
+            <div className="flex items-center justify-center">
               <Image
                 src="/hero-image.jpg"
                 alt="Piattaforma B-Link per la donazione del sangue"
                 width={720}
                 height={720}
-                className="w-full max-w-xl h-auto object-cover"
+                className="w-full max-w-xl h-auto object-cover rounded-2xl shadow-lg overflow-hidden"
                 priority
               />
             </div>
