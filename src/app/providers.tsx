@@ -29,7 +29,6 @@ function AuthInitializer() {
           setUser(me)
         } catch { }
       } catch {
-        // Refresh fallito = utente non autenticato, niente da fare
       } finally {
         setHydrated()
       }

@@ -14,8 +14,6 @@ import {
   ArrowRight,
   Heart,
   Lightbulb,
-  CheckCircle2,
-  Shield,
   UserCheck,
   BarChart3,
   FileText,
@@ -25,6 +23,7 @@ import { useAuthStore } from '@/lib/store/auth.store'
 import { ROLE_REDIRECT } from '@/lib/auth/constants'
 import { refreshClient } from '@/lib/api/axios'
 import type { AuthMeResponse } from '@/lib/types'
+import { LocationsDashboard } from '@/components/dashboard/locations-dashboard'
 
 // ── Dati ─────────────────────────────────────────────────────────────────────
 
@@ -138,6 +137,7 @@ function Navbar() {
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-500">
           {[
             ['come-funziona', 'Come funziona'],
+            ['sedi', 'Sedi'],
             ['donazioni', 'Tipologie'],
           ].map(([id, label]) => (
             <button
@@ -328,48 +328,68 @@ export default function LandingPage() {
       <Navbar />
 
       {/* ── HERO ──────────────────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20 overflow-hidden">
-        {/* Sfondo */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 left-0 right-0 h-[70%] bg-gradient-to-b from-neutral-50 to-white" />
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/6 blur-3xl" />
-        </div>
-
-        <div className="max-w-3xl mx-auto flex flex-col items-center gap-7">
-          <Image
-            src="/b-link.svg"
-            alt="B-Link"
-            width={72}
-            height={72}
-            className="rounded-2xl shadow-md"
-            priority
-          />
-
-          <div className="flex flex-col gap-4">
-            <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight leading-[1.1]">
-              Dona sangue.<br />
-              <span className="text-primary">Semplice. Digitale.</span>
-            </h1>
-            <p className="text-lg sm:text-xl text-neutral-500 font-normal leading-relaxed max-w-xl mx-auto">
-              Prenota una donazione, tieni traccia del tuo percorso e ricevi i referti medici — tutto online, in pochi clic.
-            </p>
+      <section className="relative min-h-screen flex items-center px-6 pt-20 overflow-hidden">
+        <div className="w-full max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch gap-12 lg:gap-16">
+            {/* Colonna sinistra */}
+            <div className="flex flex-col justify-center items-start text-left gap-7">
+              <Image
+                src="/b-link.svg"
+                alt="B-Link"
+                width={72}
+                height={72}
+                className="rounded-2xl shadow-md"
+                priority
+              />
+      
+              <div className="flex flex-col items-start gap-4">
+                <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight leading-[1.1]">
+                  Dona sangue.
+                  <br />
+                  <span className="text-primary">Semplice. Digitale.</span>
+                </h1>
+      
+                <p className="max-w-xl text-lg sm:text-xl text-neutral-500 font-normal leading-relaxed">
+                  Prenota una donazione, tieni traccia del tuo percorso e ricevi
+                  i referti medici, tutto online e in pochi clic.
+                </p>
+              </div>
+      
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-1">
+                <Button
+                  size="lg"
+                  className="gap-2 px-8 h-12 text-base font-semibold"
+                  asChild
+                >
+                  <Link href="/auth/register">
+                    Inizia ora
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+      
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-12 px-8 text-base font-medium text-neutral-600"
+                  asChild
+                >
+                  <Link href="/auth/login">Hai già un account?</Link>
+                </Button>
+              </div>
+            </div>
+      
+            {/* Colonna destra */}
+            <div className="flex items-center justify-center">
+              <Image
+                src="/hero-image.png"
+                alt="Piattaforma B-Link per la donazione del sangue"
+                width={720}
+                height={720}
+                className="w-full max-w-xl h-auto object-contain"
+                priority
+              />
+            </div>
           </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-3 mt-1">
-            <Button size="lg" className="gap-2 px-8 h-12 text-base font-semibold" asChild>
-              <Link href="/auth/register">
-                Inizia ora
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" className="h-12 text-base px-8 font-medium text-neutral-600" asChild>
-              <Link href="/auth/login">Hai già un account?</Link>
-            </Button>
-          </div>
-
-          <p className="text-sm text-neutral-400 font-normal">
-            Gratuito · Nessuna carta di credito
-          </p>
         </div>
       </section>
 
@@ -433,6 +453,13 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── SEDI ─────────────────────────────────────────────────────────────── */}
+      <section id="sedi" className="py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <LocationsDashboard />
+        </div>
+      </section>
+
       {/* ── TIPOLOGIE ─────────────────────────────────────────────────────────── */}
       <section id="donazioni" className="py-24 px-6 bg-neutral-50">
         <div className="max-w-6xl mx-auto">
@@ -451,29 +478,6 @@ export default function LandingPage() {
           <p className="text-center text-xs text-neutral-400 mt-8">
             B-Link verifica automaticamente la tua idoneità al momento della prenotazione.
           </p>
-        </div>
-      </section>
-
-      {/* ── PRIVACY ───────────────────────────────────────────────────────────── */}
-      <section className="py-16 px-6 border-y border-neutral-200">
-        <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 mx-auto sm:mx-0">
-            <Shield className="h-7 w-7 text-primary" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-lg mb-1.5">I tuoi dati sono al sicuro</h3>
-            <p className="text-neutral-500 text-sm leading-relaxed">
-              B-Link è conforme al <strong className="text-neutral-700">GDPR</strong>. I tuoi dati sanitari sono cifrati e non vengono mai condivisi con terzi. Puoi richiedere l&apos;esportazione o la cancellazione del tuo account in qualsiasi momento.
-            </p>
-          </div>
-          <div className="flex flex-col gap-1.5 shrink-0">
-            {['GDPR Compliant', 'Dati cifrati', 'Controllo totale'].map((label) => (
-              <div key={label} className="flex items-center gap-2 text-sm font-medium text-emerald-600">
-                <CheckCircle2 className="h-4 w-4" />
-                {label}
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
