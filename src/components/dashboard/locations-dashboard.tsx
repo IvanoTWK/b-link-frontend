@@ -8,7 +8,7 @@ import { apiClient } from '@/lib/api/axios'
 import type { Center } from '@/lib/types'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
-import { LocationsList, LocationsListSkeleton, BookLocationButton } from '@/components/dashboard/locations-list'
+import { LocationsSelector, LocationsSelectorSkeleton } from '@/components/dashboard/locations-list'
 import { LocationsMap } from '@/components/dashboard/locations-map'
 
 interface PaginatedCenters {
@@ -37,11 +37,16 @@ export function LocationsDashboard() {
   })
 
   const mappedCenters = useMemo(() => centers.filter(hasCoordinates), [centers])
-  const selectedCenter = selected && centers.some((center) => center.id === selected.id) ? selected : mappedCenters[0] ?? null
+  const selectedCenter = selected && centers.some((center) => center.id === selected.id)
+    ? selected
+    : centers[0] ?? null
+  const selectedMapCenter = selectedCenter && hasCoordinates(selectedCenter)
+    ? selectedCenter
+    : mappedCenters[0] ?? null
 
   if (isError) {
     return (
-      <Empty className="min-h-[26rem] border border-border">
+      <Empty className="min-h-104 border border-border">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <MapPin />
@@ -55,23 +60,23 @@ export function LocationsDashboard() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold">Sedi</h1>
-          <p className="text-sm text-muted-foreground">
-            Consulta le sedi B-Link e scegli quella più comoda per la tua prossima donazione.
-          </p>
-        </div>
-        <BookLocationButton />
+      <div>
+        <p className="mb-3 text-sm font-semibold text-primary uppercase tracking-widest">Sedi</p>
+        <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
+          Trova una sede B-Link
+        </h2>
+        <p className="max-w-xl text-lg text-neutral-500">
+          Seleziona una sede e consulta la posizione sulla mappa.
+        </p>
       </div>
 
       {isLoading ? (
-        <div className="grid min-h-[34rem] grid-cols-1 gap-4 lg:grid-cols-[minmax(18rem,22rem)_1fr]">
-          <LocationsListSkeleton />
-          <Skeleton className="min-h-[28rem] rounded-md" />
+        <div className="grid gap-4">
+          <LocationsSelectorSkeleton />
+          <Skeleton className="h-88 rounded-md md:h-96" />
         </div>
       ) : centers.length === 0 ? (
-        <Empty className="min-h-[26rem] border border-border">
+        <Empty className="min-h-104 border border-border">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <MapPin />
@@ -81,12 +86,12 @@ export function LocationsDashboard() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="grid min-h-[34rem] grid-cols-1 gap-4 lg:grid-cols-[minmax(18rem,22rem)_1fr]">
-          <LocationsList centers={centers} selected={selectedCenter} onSelect={setSelected} />
+        <div className="grid gap-4">
+          <LocationsSelector centers={centers} selected={selectedCenter} onSelect={setSelected} />
 
-          <div className="min-h-[28rem] overflow-hidden rounded-md border border-border bg-muted">
+          <div className="relative z-0 h-88 overflow-hidden rounded-md border border-border bg-muted md:h-96">
             {mappedCenters.length > 0 ? (
-              <LocationsMap centers={mappedCenters} selected={selectedCenter} onSelect={setSelected} />
+              <LocationsMap centers={mappedCenters} selected={selectedMapCenter} onSelect={setSelected} />
             ) : (
               <Empty className="h-full border-0 bg-background">
                 <EmptyHeader>

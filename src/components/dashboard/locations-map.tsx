@@ -132,5 +132,5 @@ export function LocationsMap({ centers, selected, onSelect }: LocationsMapProps)
     stateRef.current.markers.get(selected.id)?.openPopup()
   }, [isReady, selected])
 
-  return <div ref={containerRef} className="h-full w-full" />
+  return <div ref={containerRef} className="relative z-0 h-full w-full" />
 }
