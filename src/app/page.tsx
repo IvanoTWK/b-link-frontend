@@ -381,7 +381,7 @@ export default function LandingPage() {
             {/* Colonna destra */}
             <div className="flex items-center justify-center">
               <Image
-                src="/hero-image.png"
+                src="/hero-image.jpg"
                 alt="Piattaforma B-Link per la donazione del sangue"
                 width={720}
                 height={720}
